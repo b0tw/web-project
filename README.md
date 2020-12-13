@@ -24,29 +24,3 @@ grade is computed by eliminating the lowest and the highest grade and averaged i
 The plan is to work by adding gradually fully-implemented features (backend + frontend).
 The work for each individual feature will be done on a separate branch.
 
-## Installation
-
-TODO: more detail
-
-Client:
-
-```bash
-cd client
-npm install
-```
-
-Server:
-
-```bash
-cd server
-npm install
-```
-
-For the server, make the following file in the `server/` directory, named `appsettings.json`:
-
-```json
-{
-  "port": 8080, // your desired port
-}
-```
-
