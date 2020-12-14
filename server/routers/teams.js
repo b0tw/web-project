@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router();
+<<<<<<< HEAD
 const Team = require('../entities/database/context').Team
 
 router.get('/get', async (req, res) => {
@@ -49,6 +50,19 @@ router.delete('/delete', async (req, res) => {
         res.status(400).send({ "message": "Something happened at deletion" })
     }
 
+=======
+
+router.get('/get',(req,res)=>{
+    res.status(400)
+})
+
+router.post('/add',(req,res)=>{
+    res.status(400)
+})
+
+router.put('/update',(req,res)=>{
+    res.status(400)
+>>>>>>> Added the structure for the route
 })
 
 module.exports = router
