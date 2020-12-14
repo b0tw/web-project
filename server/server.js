@@ -4,6 +4,9 @@ const settings = JSON.parse(fs.readFileSync('appsettings.json'));
 const logger = require('morgan');
 <<<<<<< HEAD
 const context = require('./entities/database/context');
+<<<<<<< HEAD
+=======
+>>>>>>> Added the structure for the route
 =======
 >>>>>>> Added the structure for the route
 const router = require('./routers')
@@ -11,6 +14,9 @@ const router = require('./routers')
 const app = express();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Added the structure for the route
 context.connection.authenticate().then(() => {
   console.log('Successfully connected to the database...');
   context.connection.sync();
