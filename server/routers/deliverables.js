@@ -5,6 +5,7 @@ router.post('/add', (req, res) => {
     projectId = req.body.projectId
     title = req.body.title
     description = req.body.description
+    link = req.body.link
 
     //validating the received data
     if (title === null || title.length > 20) {
@@ -13,12 +14,15 @@ router.post('/add', (req, res) => {
     else if (description.length > 200) {
         res.status(400).send({ "message": "Description is too large" })
     }
-
+    else if(link ===null){
+        res.status(400).send({"message":"Link is invalid"})
+    }
     //creating the object
     let deliverable = {
         projectId,
         title,
-        description
+        description,
+        link
     }
 
     //storing it into the database
@@ -41,7 +45,7 @@ router.put('/update', (req, res) => {
     projectId = req.body.projectId
     title = req.body.title
     description = req.body.description
-
+    link = req.body.link
     //validate projectId
 
 
@@ -54,6 +58,11 @@ router.put('/update', (req, res) => {
         //update description in the db
 
     }
+
+    if(link !==null){
+        //update link in the db
+    }
     res.status(400).send({"message":"db"})
 })
+
 module.exports = router
