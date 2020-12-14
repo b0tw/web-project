@@ -7,10 +7,6 @@ const router = require('./routers')
 
 const app = express();
 
-<<<<<<< HEAD
-
-=======
->>>>>>> Added the structure for the route
 context.connection.authenticate().then(() => {
   console.log('Successfully connected to the database...');
   context.connection.sync();
