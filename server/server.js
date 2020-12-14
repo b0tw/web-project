@@ -3,6 +3,7 @@ const fs = require('fs');
 const settings = JSON.parse(fs.readFileSync('appsettings.json'));
 const logger = require('morgan');
 const context = require('./entities/database/context');
+
 const router = require('./routers')
 
 const app = express();
