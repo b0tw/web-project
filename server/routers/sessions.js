@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const bcrypt = require('bcrypt');
-const jwt = require('jwt');
+const jwt = require('jsonwebtoken');
 const security = require('../entities/settings').security;
 const context = require('../entities/database/context');
 const apiError = require('../entities/api-error');
@@ -56,3 +56,5 @@ router.get('/logout', async (req, res) =>
 
   return res.sendStatus(204);
 });
+
+module.exports = router;
