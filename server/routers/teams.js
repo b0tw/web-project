@@ -3,7 +3,6 @@ const router = express.Router();
 const context = require('../entities/database/context')
 const Team = context.Team
 
-
 router.get('/get', async (req, res) => {
 
     // get the team id
