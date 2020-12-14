@@ -1,5 +1,5 @@
-# Configuration files
-appsettings.json
+# ESLint
+.eslintrc.json
 
 # Logs
 logs
