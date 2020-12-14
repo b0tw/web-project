@@ -3,16 +3,14 @@ const fs = require('fs');
 const settings = JSON.parse(fs.readFileSync('appsettings.json'));
 const logger = require('morgan');
 const context = require('./entities/database/context');
+const router = require('./routers')
 
 const app = express();
-const router = require('./routers');
 
-context.connection.authenticate().then(() =>
-{
+context.connection.authenticate().then(() => {
   console.log('Successfully connected to the database...');
   context.connection.sync();
   console.log('Database is up to date.');
-
   // Setup logger.
   app.use(logger('dev'));
 
