@@ -3,7 +3,7 @@ const Deliverable = require('./deliverable');
 const Project = require('./project');
 const Team = require('./team');
 const User = require('./user');
-const Juries = require('./juries');
+const Jury = require('./jury');
 
 
 Project.belongsTo(Team, { foreignKey: 'team_id' });
@@ -19,5 +19,5 @@ module.exports = {
   Project: Project,
   Team: Team,
   User: User,
-  Juries: Juries
+  Jury: Jury
 };
