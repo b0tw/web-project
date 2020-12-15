@@ -1,5 +1,9 @@
 const express = require('express')
 const router = express.Router();
+const authMiddleware = require('../middleware/authentication-middleware');
+
+// TODO: uncomment and test after session router is made
+//router.use(authMiddleware());
 
 router.post('/add', (req, res) => {
     projectId = req.body.projectId
