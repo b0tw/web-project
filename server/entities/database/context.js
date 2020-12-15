@@ -7,11 +7,14 @@ const Jury = require('./jury');
 
 
 Project.belongsTo(Team, { foreignKey: 'team_id' });
-Project.belongsToMany(User, { through: 'Juries' });
-Project.hasMany(Deliverable, { foreignKey: 'project_id' });
+Project.belongsToMany(User, { through: Jury });
+Project.hasMany(Deliverable);
+
+Team.hasOne(Project, { foreignKey: 'project_id' });
 Team.belongsToMany(User, { through: 'UserTeams' });
+
 User.belongsToMany(Team, { through: 'UserTeams' });
-User.belongsToMany(Project, { through: 'Juries' });
+User.belongsToMany(Project, { through: Jury });
 
 module.exports = {
   connection: connection,
