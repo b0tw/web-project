@@ -6,21 +6,21 @@ const dataTypes = sequelize.DataTypes;
 class Juries extends Model{}
 
 Juries.init({
-    ProjectId: {
+    project_id: {
         type: dataTypes.INTEGER,
         allowNull: false,
         primaryKey: true
     },
-    UserId: {
+    user_id: {
         type: dataTypes.INTEGER,
         allowNull: false,
         primaryKey: true
     },
-    Grade: {
+    grade: {
         type: dataTypes.FLOAT,
     
     },
-    Date_graded: {
+    date_graded: {
         type: dataTypes.DATE
     },
 },

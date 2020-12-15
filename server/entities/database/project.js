@@ -15,12 +15,6 @@ Project.init({
     type: dataTypes.STRING(45),
     allowNull: false
   },
-  grade: {
-    type: dataTypes.FLOAT
-  },
-  graded_time: {
-    type: dataTypes.DATE
-  },
 }, {
   sequelize: connection,
   modelName: 'Project'
