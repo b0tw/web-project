@@ -5,12 +5,28 @@ const apiError = require('../entities/api-error');
 
 // TODO: uncomment and test after session router is made
 router.use(authMiddleware());
+const context = require('../entities/database/context')
+const Deliverable = context.Deliverable
+const Project = context.Project
 
-router.post('/add', (req, res) => {
-    projectId = req.body.projectId
+
+router.get('/', async(req, res) => {
+    id = req.query.id
+    deliverable = await Deliverable.findOne({ where: { id } })
+
+    if (deliverable !== null) {
+        res.status(200).send({ deliverable })
+    }
+    else {
+        res.status(400).send({ "message": "Deliverable or project not found" })
+    }
+})
+
+router.post('/add', async (req, res) => {
     title = req.body.title
     description = req.body.description
-    link = req.body.link
+    url = req.body.url
+    project_id = req.body.project_id
 
     //validating the received data
     if (title === null || title.length > 20) {
@@ -19,55 +35,62 @@ router.post('/add', (req, res) => {
     else if (description.length > 200) {
         res.status(400).send(apiError.InvalidRequest);
     }
-    else if(link ===null){
+    else if(url ===null){
         res.status(400).send(apiError.InvalidRequest);
     }
-    //creating the object
-    let deliverable = {
-        projectId,
-        title,
-        description,
-        link
+    else {
+        const checkProject = await Project.findOne({ where: { id: project_id } })
+        if (checkProject === null) {
+            res.status(400).send({ "message": "Project not found" })
+        }
     }
 
-    //storing it into the database
+    try {
+        const del = await Deliverable.create({ title, description, url, project_id })
 
+        res.status(200).send({ "message": del.title + " was created." })
+    }
+    catch (err) {
+        console.log(err)
+        res.status(400).send({ "message": "Something bad happened" })
+    }
 
-    //response (will be a message after the db is made)
-    res.status(200).send(deliverable)
+    try {
+        const del = await Deliverable.create({ title, description, url, project_id })
+
+        res.status(200).send({ "message": del.title + " was created." })
+    }
+    catch (err) {
+        console.log(err)
+        res.status(400).send({ "message": "Something bad happened" })
+    }
 })
 
-router.get('/get', (req, res) => {
-    projectId = req.body.projectId
-
-    //search in db
-
-
-    res.status(200).send(projectId)
-})
-
-router.put('/update', (req, res) => {
-    projectId = req.body.projectId
+router.put('/:id', async (req, res) => {
+    id = req.params.id
     title = req.body.title
     description = req.body.description
     link = req.body.link
-    //validate projectId
+    project_id = req.body.project_id
 
-
-    if (title !== null && title.length < 10) {
-        //update title in the db
-
+    let checkDeliverable = await Deliverable.findOne({ where: { id, project_id } })
+    if (checkDeliverable === null) {
+        res.status(400).send({ "message": "Deliverable does not exist" })
     }
+    else {
+        if (title !== null && title.length < 20) {
+            checkDeliverable.title = title
+        }
+        if (description !== null && description.length < 200) {
+            checkDeliverable.description = description
+        }
+        if (link !== null) {
+            checkDeliverable.link = link
+        }
 
-    if(description !== null && description.length <20){
-        //update description in the db
-
+        await checkDeliverable.save()
+        res.status(200).send({ "message": "Changes were made successfully" })
     }
-
-    if(link !==null){
-        //update link in the db
-    }
-    res.status(400).send({"message":"db"})
 })
 
 module.exports = router
