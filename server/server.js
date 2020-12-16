@@ -16,6 +16,5 @@ context.connection.authenticate().then(() => {
 
   app.use(express.json())
   app.use('/api', router)
-
   app.listen(settings.port, () => console.log(`Listening on port ${settings.port}...`));
 }).catch(error => console.error('Unable to connect to the database:', error));
