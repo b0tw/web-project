@@ -6,11 +6,6 @@ const dataTypes = sequelize.DataTypes;
 class User extends Model {}
 
 User.init({
-  id: {
-    type: dataTypes.INTEGER,
-    allowNull: false,
-    primaryKey: true
-  },
   surname: {
     type: dataTypes.STRING(45),
     allowNull: false

@@ -3,9 +3,9 @@ const connection = require('./connection');
 const Model = sequelize.Model;
 const dataTypes = sequelize.DataTypes;
 
-class Juries extends Model{}
+class Jury extends Model{}
 
-Juries.init({
+Jury.init({
     project_id: {
         type: dataTypes.INTEGER,
         allowNull: false,
@@ -28,4 +28,4 @@ Juries.init({
     modelName: 'Juries'
 });
 
-module.exports = Juries;
+module.exports = Jury;
