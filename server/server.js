@@ -9,8 +9,6 @@ const app = express();
 
 context.connection.authenticate().then(() => {
   console.log('Successfully connected to the database...');
-  context.connection.sync();
-  console.log('Database is up to date.');
   
   // Setup logger.
   app.use(logger('dev'));

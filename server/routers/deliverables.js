@@ -15,10 +15,10 @@ router.get('/', async (req, res) => {
     deliverable = await Deliverable.findOne({ where: { id } })
 
     if (deliverable !== null) {
-        res.status(200).send({ deliverable })
+        return res.status(200).send(deliverable)
     }
     else {
-        res.status(400).send({ "message": "Deliverable or project not found" })
+        return res.status(400).send({ "message": "Deliverable or project not found" })
     }
 })
 
@@ -30,27 +30,27 @@ router.post('/', async (req, res) => {
 
     //validating the received data
     if (title === null || title.length > 20) {
-        res.status(400).send(apiError.InvalidRequest);
+        return res.status(400).send(apiError.InvalidRequest);
     }
     else if (description.length > 200) {
-        res.status(400).send(apiError.InvalidRequest);
+        return res.status(400).send(apiError.InvalidRequest);
     }
     else if (url === null) {
-        res.status(400).send(apiError.InvalidRequest);
+        return res.status(400).send(apiError.InvalidRequest);
     }
     else {
         const checkProject = await Project.findOne({ where: { id: project_id } })
         if (checkProject === null) {
-            res.status(400).send({ "message": "Project not found" })
+            return res.status(400).send({ "message": "Project not found" })
         }
     }
     try {
         const del = await Deliverable.create({ title, description, url, project_id })
 
-        res.status(200).send({ "message": del.title + " was created." })
+        return res.status(200).send({ "message": del.title + " was created." })
     }
     catch (err) {
-        res.status(400).send({ "message": "Something bad happened" })
+        return res.status(400).send({ "message": "Something bad happened" })
     }
 })
 
@@ -63,7 +63,7 @@ router.put('/:id', async (req, res) => {
 
     let checkDeliverable = await Deliverable.findOne({ where: { id, project_id } })
     if (checkDeliverable === null) {
-        res.status(400).send({ "message": "Deliverable does not exist" })
+        return res.status(400).send({ "message": "Deliverable does not exist" })
     }
     else {
         if (title !== null && title.length < 20) {
@@ -77,7 +77,7 @@ router.put('/:id', async (req, res) => {
         }
 
         await checkDeliverable.save()
-        res.status(200).send({ "message": "Changes were made successfully" })
+        return res.status(200).send({ "message": "Changes were made successfully" })
     }
 })
 
