@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router();
-const Team = require('../entities/database/context').Team
+const context = require('../entities/database/context')
+const Team = context.Team
 
 router.get('/get', async (req, res) => {
 
