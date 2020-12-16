@@ -1,9 +1,10 @@
 const express = require('express')
 const router = express.Router();
 const authMiddleware = require('../middleware/authentication-middleware');
+const apiError = require('../entities/api-error');
 
 // TODO: uncomment and test after session router is made
-//router.use(authMiddleware());
+router.use(authMiddleware());
 
 router.post('/add', (req, res) => {
     projectId = req.body.projectId
@@ -13,13 +14,13 @@ router.post('/add', (req, res) => {
 
     //validating the received data
     if (title === null || title.length > 20) {
-        res.status(400).send({ "message": "Title is invalid" })
+        res.status(400).send(apiError.InvalidRequest);
     }
     else if (description.length > 200) {
-        res.status(400).send({ "message": "Description is too large" })
+        res.status(400).send(apiError.InvalidRequest);
     }
     else if(link ===null){
-        res.status(400).send({"message":"Link is invalid"})
+        res.status(400).send(apiError.InvalidRequest);
     }
     //creating the object
     let deliverable = {
