@@ -6,6 +6,10 @@ const dataTypes = sequelize.DataTypes;
 class User extends Model {}
 
 User.init({
+  username: {
+    type: dataTypes.STRING(45),
+    allowNull: false
+  },
   surname: {
     type: dataTypes.STRING(45),
     allowNull: false

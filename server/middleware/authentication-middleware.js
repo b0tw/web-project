@@ -12,14 +12,15 @@ const middleware = (req, res, next) =>
         return res.status(401).json(apiError.Unauthorized);
     }
 
-    jwt.verify(token, settings.accessTokenSecret, (err, user) =>
+    jwt.verify(token, settings.accessTokenSecret, (err, username) =>
     {
         if(err)
         {
             return res.status(401).json(apiError.Unauthorized);
         }
 
-        req.user = user;
+        req.username = username;
+        req.token = token;
         next();
     });
 };

@@ -4,6 +4,7 @@ const Project = require('./project');
 const Team = require('./team');
 const User = require('./user');
 const Jury = require('./jury');
+const Session = require('./session');
 
 
 Project.belongsTo(Team, { foreignKey: 'team_id' });
@@ -15,6 +16,7 @@ Team.belongsToMany(User, { through: 'UserTeams' });
 
 User.belongsToMany(Team, { through: 'UserTeams' });
 User.belongsToMany(Project, { through: Jury });
+User.hasMany(Session, { foreignKey: 'user_id' });
 
 module.exports = {
   connection: connection,
@@ -22,5 +24,6 @@ module.exports = {
   Project: Project,
   Team: Team,
   User: User,
-  Jury: Jury
+  Jury: Jury,
+  Session: Session
 };
