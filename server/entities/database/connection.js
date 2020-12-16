@@ -1,7 +1,5 @@
 const sequelize = require('sequelize');
-const fs = require('fs');
-const path = require('path');
-const databaseSettings = JSON.parse(fs.readFileSync(path.resolve('appsettings.json')))
+const databaseSettings = require('../settings')
   .connections
   .database;
 
