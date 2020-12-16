@@ -20,7 +20,15 @@ router.get('/get', async (req, res) => {
     }
 
 })
-
+router.get('/getAll', async(req,res)=>{
+    try{
+        const allTeams = await Team.findAll()
+        res.status(200).setDefaultEncoding({allTeams})
+    }
+    catch(err){
+        res.status(400).send({"message":"Something bad happened"})
+    }
+})
 router.post('/add', async (req, res) => {
     const name = req.body.name
 
