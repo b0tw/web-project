@@ -1,8 +1,5 @@
 const context = require('../entities/database/context');
-const fs = require('fs');
-const path = require('path');
-const security = JSON.parse(fs.readFileSync(path.resolve('appsettings.json')))
-  .security;
+const security = require('../entities/settings').security;
 const bcrypt = require('bcrypt');
 
 (async() =>
@@ -29,6 +26,7 @@ const bcrypt = require('bcrypt');
   {
     u.removeTeams(u.Team);
     u.removeProjects(u.Project);
+    u.removeSessions(u.Session);
     await u.save();
   });
 
@@ -40,24 +38,28 @@ const bcrypt = require('bcrypt');
   let hash = await bcrypt.hash('abc123', security.saltRounds);
   let users = await context.User.bulkCreate([
     {
+      username: 'jdoe',
       surname: 'Doe',
       name: 'John',
       password: hash,
       is_professor: 1
     },
     {
+      username: 'msue',
       surname: 'Sue',
       name: 'Mary',
       password: hash,
       is_professor: 0
     },
     {
+      username: 'jblack',
       surname: 'Black',
       name: 'Jack',
       password: hash,
       is_professor: 0
     },
     {
+      username: 'jparker',
       surname: 'Parker',
       name: 'Johanna',
       password: hash,

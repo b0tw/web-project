@@ -1,6 +1,5 @@
 const express = require('express');
-const fs = require('fs');
-const settings = JSON.parse(fs.readFileSync('appsettings.json'));
+const settings = require('./entities/settings');
 const logger = require('morgan');
 
 const context = require('./entities/database/context');
