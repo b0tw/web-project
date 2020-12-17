@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.post('/add', async (req, res) => {
+router.post('/', async (req, res) => {
     const name = req.body.name
     //get the username from the session
     const username = req.username
@@ -66,7 +66,11 @@ router.post('/add', async (req, res) => {
 
 })
 
-router.delete('/delete', async (req, res) => {
+router.put('/:id', async (req, res) => {
+
+});
+
+router.delete('/:id', async (req, res) => {
     //get the username from the session
     const username = req.username
 
