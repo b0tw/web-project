@@ -10,7 +10,7 @@ const Deliverable = context.Deliverable
 const Project = context.Project
 
 
-router.get('/', async(req, res) => {
+router.get('/', async (req, res) => {
     id = req.query.id
     deliverable = await Deliverable.findOne({ where: { id } })
 
@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
     else if (description.length > 200) {
         res.status(400).send(apiError.InvalidRequest);
     }
-    else if(url ===null){
+    else if (url === null) {
         res.status(400).send(apiError.InvalidRequest);
     }
     else {
