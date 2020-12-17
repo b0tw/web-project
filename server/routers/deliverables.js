@@ -4,7 +4,7 @@ const authMiddleware = require('../middleware/authentication-middleware');
 const apiError = require('../entities/api-error');
 
 // TODO: uncomment and test after session router is made
-router.use(authMiddleware());
+//router.use(authMiddleware());
 const context = require('../entities/database/context')
 const Deliverable = context.Deliverable
 const Project = context.Project
@@ -22,7 +22,7 @@ router.get('/', async(req, res) => {
     }
 })
 
-router.post('/add', async (req, res) => {
+router.post('/', async (req, res) => {
     title = req.body.title
     description = req.body.description
     url = req.body.url
@@ -44,24 +44,12 @@ router.post('/add', async (req, res) => {
             res.status(400).send({ "message": "Project not found" })
         }
     }
-
     try {
         const del = await Deliverable.create({ title, description, url, project_id })
 
         res.status(200).send({ "message": del.title + " was created." })
     }
     catch (err) {
-        console.log(err)
-        res.status(400).send({ "message": "Something bad happened" })
-    }
-
-    try {
-        const del = await Deliverable.create({ title, description, url, project_id })
-
-        res.status(200).send({ "message": del.title + " was created." })
-    }
-    catch (err) {
-        console.log(err)
         res.status(400).send({ "message": "Something bad happened" })
     }
 })
