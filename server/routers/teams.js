@@ -6,7 +6,7 @@ const User = context.User
 const apiError = require('../entities/api-error')
 const authentication = require('../middleware/authentication-middleware');
 
-router.use(authentication());
+//router.use(authentication());
 
 router.get('/', async (req, res) => {
 
@@ -65,10 +65,6 @@ router.post('/', async (req, res) => {
     }
 
 })
-
-router.put('/:id', async (req, res) => {
-
-});
 
 router.delete('/:id', async (req, res) => {
     //get the username from the session
