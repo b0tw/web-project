@@ -4,6 +4,9 @@ const context = require('../entities/database/context')
 const Team = context.Team
 const User = context.User
 const apiError = require('../entities/api-error')
+const authentication = require('../middleware/authentication-middleware');
+
+router.use(authentication());
 
 router.get('/', async (req, res) => {
 
@@ -34,7 +37,7 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.post('/add', async (req, res) => {
+router.post('/', async (req, res) => {
     const name = req.body.name
     //get the username from the session
     const username = req.username
@@ -63,7 +66,11 @@ router.post('/add', async (req, res) => {
 
 })
 
-router.delete('/delete', async (req, res) => {
+router.put('/:id', async (req, res) => {
+
+});
+
+router.delete('/:id', async (req, res) => {
     //get the username from the session
     const username = req.username
 
@@ -85,7 +92,6 @@ router.delete('/delete', async (req, res) => {
     else {
         res.status(400).send({ "message": apiError.Unauthorized })
     }
-
 })
 
 module.exports = router
