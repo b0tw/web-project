@@ -4,6 +4,9 @@ const context = require('../entities/database/context')
 const Team = context.Team
 const User = context.User
 const apiError = require('../entities/api-error')
+const authentication = require('../middleware/authentication-middleware');
+
+router.use(authentication());
 
 router.get('/', async (req, res) => {
 
