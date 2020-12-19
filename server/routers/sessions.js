@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const bcrypt = require('bcrypt');
-const jwt = require('jwt');
+const jwt = require('jsonwebtoken');
 const security = require('../entities/settings').security;
 const context = require('../entities/database/context');
 const apiError = require('../entities/api-error');
@@ -11,7 +11,7 @@ router.post('/login', async (req, res) =>
   let username = req.body.username,
     password = req.body.password;
 
-  let user = await context.User.findOne({ username: username, include: context.Session });
+  let user = await context.User.findOne({ where: { username: username }, include: [context.Session] });
   if(user == null)
   {
     return res.status(401).json(apiError.Unauthorized);
@@ -24,9 +24,9 @@ router.post('/login', async (req, res) =>
   }
 
   let token = jwt.sign(username, security.tokenSecret);
-  await context.Session.create({
+  let session = await context.Session.create({
     token: token,
-    user_id:  user.id
+    user_id: user.id
   });
 
   return res.status(200).json({ token: token });
@@ -52,7 +52,10 @@ router.get('/logout', async (req, res) =>
     return res.status(401).json(apiError.Unauthorized);
   }
 
-  await context.Session.destroy({ where: { id: session.id } });
+  //await context.Session.destroy({ where: { id: session.id } });
+  await session.destroy();
 
   return res.sendStatus(204);
 });
+
+module.exports = router;

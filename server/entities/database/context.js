@@ -5,7 +5,7 @@ const Team = require('./team');
 const User = require('./user');
 const Jury = require('./jury');
 const Session = require('./session');
-
+const UserTeam = require('./userteam')
 
 Project.belongsTo(Team, { foreignKey: 'team_id' });
 Project.belongsToMany(User, { through: Jury });
