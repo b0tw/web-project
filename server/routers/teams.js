@@ -6,7 +6,7 @@ const User = context.User
 const apiError = require('../entities/api-error')
 const authentication = require('../middleware/authentication-middleware');
 
-router.use(authentication());
+//router.use(authentication());
 
 router.get('/', async (req, res) => {
 
@@ -94,9 +94,9 @@ router.delete('/:id', async (req, res) => {
 
     //if the user is a professor, the deletion can happen
     if (user.is_professor === true) {
-        const name = req.body.name
+        const id = req.params.id
         try {
-            const team = await Team.findOne({ where: { name } })
+            const team = await Team.findOne({ where: { id } })
             await team.destroy()
             return res.status(200).send({ "message": "Team was deleted" })
         }
