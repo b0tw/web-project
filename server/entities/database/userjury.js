@@ -3,18 +3,15 @@ const connection = require('./connection');
 const Model = sequelize.Model;
 const dataTypes = sequelize.DataTypes;
 
-class Jury extends Model{}
+class UserJury extends Model { }
 
-Jury.init({
+UserJury.init({
     grade: {
         type: dataTypes.FLOAT
-    },
-    date_graded: {
-        type: dataTypes.DATE
-    },
-},
-    { sequelize: connection,
-    modelName: 'Juries'
-});
+    }
+}, {
+    sequelize: connection,
+    modelName: 'UserJury'
+})
 
-module.exports = Jury;
+module.exports = UserJury
