@@ -94,9 +94,11 @@ router.delete('/:id', async (req, res) => {
 
     //if the user is a professor, the deletion can happen
     if (user.is_professor === true) {
-        const name = req.body.name
+        const id = req.params.id
         try {
-            const team = await Team.findOne({ where: { name } })
+            const team = await Team.findOne({ where: { id }, include: [ context.User, context.Project ] })
+            team.removeProjects(team.Projects);
+            team.removeUsers(team.Users);
             await team.destroy()
             return res.status(200).send({ "message": "Team was deleted" })
         }
