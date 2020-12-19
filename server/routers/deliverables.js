@@ -3,8 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authentication-middleware');
 const apiError = require('../entities/api-error');
 
-// TODO: uncomment and test after session router is made
-//router.use(authMiddleware());
+router.use(authMiddleware());
 const context = require('../entities/database/context')
 const Deliverable = context.Deliverable
 const Project = context.Project

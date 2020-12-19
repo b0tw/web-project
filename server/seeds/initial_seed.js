@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 (async() =>
 {
   await context.connection.authenticate();
+  context.connection.options.logging = true;
   await context.connection.sync({ force: true });
 
   let existingProjects = await context.Project.findAll({ include: context.Deliverable });
