@@ -6,12 +6,9 @@ const dataTypes = sequelize.DataTypes;
 class Jury extends Model{}
 
 Jury.init({
-    grade: {
+    total_grade: {
         type: dataTypes.FLOAT
-    },
-    date_graded: {
-        type: dataTypes.DATE
-    },
+    }
 },
     { sequelize: connection,
     modelName: 'Juries'

@@ -8,6 +8,9 @@ class UserJury extends Model { }
 UserJury.init({
     grade: {
         type: dataTypes.FLOAT
+    },
+    deadline: {
+        type: dataTypes.DATE
     }
 }, {
     sequelize: connection,

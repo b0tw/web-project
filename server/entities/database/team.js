@@ -10,6 +10,10 @@ Team.init({
     type: dataTypes.STRING(45),
     allowNull: false
   },
+  project_name:{
+    type: dataTypes.STRING(45),
+    allowNull: false
+  }
 }, {
   sequelize: connection,
   modelName: 'Team'
