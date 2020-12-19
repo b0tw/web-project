@@ -8,7 +8,8 @@ const connection = new sequelize.Sequelize(databaseSettings.name,
   databaseSettings.password,
   {
     host: databaseSettings.host,
-    dialect: databaseSettings.dialect
+    dialect: databaseSettings.dialect,
+    logging: false
   });
 
 module.exports = connection;
