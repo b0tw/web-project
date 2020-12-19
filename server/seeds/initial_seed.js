@@ -124,15 +124,39 @@ const bcrypt = require('bcrypt');
   await juries[1].save();
   juries[1].setUsers(users[1])
   await juries[1].save();
-  
+
+  // one of the rows will not update
+  // i think it has something to do with the async 
   await context.UserJury.update({
-    grade: 8,
+    grade: 7,
+    deadline: Date.now()
+  },
+    {
+      where: {
+        UserId: 2,
+        JuryId: 2
+      }
+    });
+
+  await context.UserJury.update({
+    grade: 10,
     deadline: Date.now()
   },
     {
       where: {
         UserId: 3,
         JuryId: 1
+      }
+    });
+
+  await context.UserJury.update({
+    grade: 8,
+    deadline: Date.now()
+  },
+    {
+      where: {
+        UserId: 1,
+        JuryId: 2
       }
     });
   await context.UserJury.update({
@@ -145,27 +169,6 @@ const bcrypt = require('bcrypt');
         JuryId: 1
       }
     });
-  await context.UserJury.update({
-    grade: 10,
-    deadline: Date.now()
-  },
-    {
-      where: {
-        UserId: 1,
-        JuryId: 2
-      }
-    });
-  await context.UserJury.update({
-    grade: 7,
-    deadline: Date.now()
-  },
-    {
-      where: {
-        UserId: 2,
-        JuryId: 2
-      }
-    });
-  
-    // query to set the total_grade to the jury
-    // ..................
+  // query to set the total_grade to the jury
+  // ..................
 })();
