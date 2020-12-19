@@ -126,15 +126,10 @@ router.delete('/:id', async (req, res) =>
     return res.status(400).json(apiError.InvalidRequest);
   }
 
-  let user = await context.User.findOne({ id: id, include: [ context.Project, context.Team, context.Session ] });
+  let user = await context.User.findOne({ id: id, include: [ context.Team, context.Session ] });
   if(user == null)
   {
     return res.status(400).json(apiError.InvalidRequest);
-  }
-
-  if(user.Project && user.Project.length > 0)
-  {
-    user.removeProjects(user.Project);
   }
 
   if(user.Team && user.Team.length > 0)
