@@ -106,10 +106,16 @@ router.put('/:id', async (req, res, next) =>
       return res.status(400).json(apiError.InvalidRequest);
     }
 
+    let currentUser = await context.User.findOne({ where: { username: req.username } });
     let user = await context.User.findOne({ id: id });
-    if(user == null)
+    if(currentUser == null || user == null)
     {
       return res.status(400).json(apiError.InvalidRequest);
+    }
+    
+    if(currentUser.id != user.id && currentUser.is_professor == 0)
+    {
+      return res.status(401).json(apiError.Unauthorized);
     }
 
     let passwdHash = null;
@@ -149,10 +155,16 @@ router.delete('/:id', async (req, res, next) =>
 
   try
   {
+    let currentUser = await context.User.findOne({ where: { username: req.username } });
     let user = await context.User.findOne({ id: id, include: [ context.Team, context.Session ] });
-    if(user == null)
+    if(currentUser == null || user == null)
     {
       return res.status(400).json(apiError.InvalidRequest);
+    }
+    
+    if(currentUser.id != user.id && currentUser.is_professor == 0)
+    {
+      return res.status(401).json(apiError.Unauthorized);
     }
 
     if(user.Team && user.Team.length > 0)

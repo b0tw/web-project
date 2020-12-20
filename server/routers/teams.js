@@ -36,7 +36,11 @@ router.get('/:id', async (req, res, next) => {
     let team = await context.Team.findOne({ where: { id: id }, include: [
       { model: context.User, attributes: ['id', 'surname', 'name'] },
       { model: context.Deliverable },
-      { model: context.UserJury }
+      { 
+        model: context.Jury, include: [
+          { model: context.User, attributes: [ 'id' ] }
+        ]
+      }
     ]});
     if (team == null) {
       return res.status(400).send(apiError.InvalidRequest);
@@ -54,11 +58,10 @@ router.post('/', async (req, res, next) => {
   const name = req.body.name
   const project_name = req.body.project_name
 
-  //get the username from the session
-  const username = req.username
-
   try
   {
+    //get the username from the session
+    const username = req.username
     //search in the db the user
     const user = await User.findOne({ where: username })
     //if the user is a professor, the addition can happen
@@ -73,7 +76,7 @@ router.post('/', async (req, res, next) => {
       }
       else {
         const team = await Team.create({ name, project_name })
-        const jury = await context.Jury.create({ team_id: team.id });
+        await context.Jury.create({ team_id: team.id });
         return res.status(200).send({ "message": "Team " + team.name + " was created." })
       }
     }
@@ -91,11 +94,11 @@ router.delete('/:id', async (req, res, next) => {
   //get the username from the session
   const username = req.username
 
-  //search in the db the user
-  const user = await User.findOne({ where: username })
-
   try
   {
+    //search in the db the user
+    const user = await User.findOne({ where: username })
+
     //if the user is a professor, the deletion can happen
     if (user && user.is_professor == 1) {
       const id = req.params.id
@@ -129,6 +132,12 @@ router.post('/:id/members', async (req, res, next) => {
 
   try
   {
+    let user = await context.User.findOne({ where: [ { username: req.username } ] });
+    if(!user && user.is_professor != 1)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
     if (members.some(m => m.id == null || m.username == null || m.username.match(/^[ ]*$/g))) {
       return res.status(400).json(apiError.InvalidRequest);
     }
@@ -166,6 +175,12 @@ router.delete('/:id/members', async (req, res, next) => {
 
   try
   {
+    let user = await context.User.findOne({ where: [ { username: req.username } ] });
+    if(!user && user.is_professor != 1)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
     if (members.some(m => m.id == null || m.username == null || m.username.match(/^[ ]*$/g))) {
       return res.status(400).json(apiError.InvalidRequest);
     }
@@ -207,10 +222,21 @@ router.post('/:id/deliverables', async (req, res, next) => {
 
   try
   {
+    let user = await context.User.findOne({ where: [ { username: req.username } ] });
+    if(!user)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
     const team = await context.Team.findOne({ where: { id: id } })
     if (team == null) {
         return res.status(400).send(apiError.InvalidRequest)
     }
+    if(team.Users.find(u => u.id == user.id) == null)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
     const del = await context.Deliverable.create({ title: title, description: description, url: url, team_id: id })
 
     team.Deliverables.push(del);
@@ -234,6 +260,21 @@ router.put('/:id/deliverables/:deliverableId', async (req, res, next) => {
 
   try
   {
+    let user = await context.User.findOne({ where: [ { username: req.username } ] });
+    if(!user)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
+    const team = await context.Team.findOne({ where: { id: id }, include: [ context.User ] })
+    if (team == null) {
+        return res.status(400).send(apiError.InvalidRequest)
+    }
+    if(team.Users.find(u => u.id == user.id) == null)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
     let deliverable = await context.Deliverable.findOne({ where: { id: deliverableId, team_id: id } })
     if (deliverable == null) {
         return res.status(400).send(apiError.InvalidRequest);
@@ -264,14 +305,24 @@ router.delete('/:id/deliverables', async (req, res, next) => {
 
   try
   {
+    let user = await context.User.findOne({ where: [ { username: req.username } ] });
+    if(!user)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
     //validating the received data
     if (isNaN(id) || typeof deliverables != 'object' || deliverables.some(d => typeof d.id == 'number')) {
         return res.status(400).send(apiError.InvalidRequest);
     }
 
-    const team = await context.Team.findOne({ where: { id: id } })
+    const team = await context.Team.findOne({ where: { id: id }, include: [ context.User ] })
     if (team == null) {
         return res.status(400).send(apiError.InvalidRequest)
+    }
+    if(team.Users.find(u => u.id == user.id) == null)
+    {
+      return res.status(401).json(apiError.Unauthorized);
     }
     
     const newDeliverables = [];
@@ -300,6 +351,12 @@ router.post('/:id/juries', async (req, res, next) => {
 
   try
   {
+    let user = await context.User.findOne({ where: [ { username: req.username } ] });
+    if(!user || user.is_professor != 1)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
     //validating the received data
     if (isNaN(id) || typeof juries != 'object' || juries.some(j => typeof j.id != 'number' || j.username == null)) {
         return res.status(400).send(apiError.InvalidRequest);
@@ -309,7 +366,8 @@ router.post('/:id/juries', async (req, res, next) => {
     if (team == null) {
         return res.status(400).send(apiError.InvalidRequest)
     }
-    const users = await context.User.findAll({ where: { [Op.or]: juries.map(j => j.id)  } });
+
+    const users = await context.User.findAll({ where: { id: juries.map(j => j.id)  } });
     if(users == null || users.length < 1 || users.some(u => juries.filter(j => j.id == u.id && j.username == u.username).length < 1))
     {
         return res.status(400).send(apiError.InvalidRequest);
@@ -332,6 +390,12 @@ router.delete('/:id/juries', async (req, res, next) => {
 
   try
   {
+    let user = await context.User.findOne({ where: [ { username: req.username } ] });
+    if(!user || user.is_professor != 1)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
     //validating the received data
     if (isNaN(id) || typeof juries != 'object' || juries.some(j => typeof j.id != 'number' || j.username == null)) {
         return res.status(400).send(apiError.InvalidRequest);
@@ -355,6 +419,61 @@ router.delete('/:id/juries', async (req, res, next) => {
     await team.save()
 
     return res.status(200).send({ "message": "Team juries updated successfully." })
+  }
+  catch(err)
+  {
+    next(err);
+  }
+});
+
+router.post('/:id/grade', async (req, res, next) =>
+{
+  let id = parseInt(req.params.id),
+    username = req.username,
+    grade = parseFloat(req.body.grade);
+
+  try
+  {
+    if(isNaN(id) || username == null || isNaN(grade))
+    {
+      return res.status(400).json(apiError.InvalidRequest);
+    }
+
+    const team = await context.Team.findOne({ where: { id: id }, include: [ { model: context.Jury, include: [ context.UserJury ] } ] })
+    if(team == null) {
+        return res.status(400).send(apiError.InvalidRequest)
+    }
+
+    const user = await context.User.findOne({ where: { username: username } });
+    if(user == null)
+    {
+        return res.status(400).send(apiError.InvalidRequest);
+    }
+
+    if(team.Jury.User.find(u => u.id == user.id) == null)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
+    let userJury = team.Jury.UserJury.find(uj => uj.user_id == user.id);
+    if(userJury)
+    {
+      if(userJury.deadline < new Date())
+      {
+        return res.status(401).json(apiError.Unauthorized);
+      }
+
+      userJury.grade = grade;
+      await userJury.save();
+    }
+    else
+    {
+      let tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      await context.UserJury.create({ grade: grade, deadline: tomorrow, user_id: user.id, jury_id: team.Jury.id });
+    }
+
+    return res.status(200).json({ message: "Successfully updated team grade." });
   }
   catch(err)
   {
