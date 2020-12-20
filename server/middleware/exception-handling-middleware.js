@@ -1,11 +1,12 @@
-const middleware = async (err, req, res, next) =>
+const middleware = (err, req, res, next) =>
 {
-  if(res.headersSent)
+  console.log(err)
+  if(res && res.headersSent)
   {
     return next(err);
   }
 
-  return res.status(500).json({ message: err });
+  return res.status(500).json({ message: err.toString() });
 };
 
 module.exports = () => middleware;

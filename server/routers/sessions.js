@@ -6,56 +6,70 @@ const context = require('../entities/database/context');
 const apiError = require('../entities/api-error');
 const authenticationMiddleware = require('../middleware/authentication-middleware');
 
-router.post('/login', async (req, res) =>
+router.post('/login', async (req, res, next) =>
 {
   let username = req.body.username,
     password = req.body.password;
 
-  let user = await context.User.findOne({ where: { username: username }, include: [context.Session] });
-  if(user == null)
+  try
   {
-    return res.status(401).json(apiError.Unauthorized);
-  }
+    let user = await context.User.findOne({ where: { username: username }, include: [context.Session] });
+    if(user == null)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
 
-  let hash = await bcrypt.compare(password, user.password);
-  if(hash == null)
+    let hash = await bcrypt.compare(password, user.password);
+    if(hash == null)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
+    let token = jwt.sign(username, security.tokenSecret);
+    let session = await context.Session.create({
+      token: token,
+      user_id: user.id
+    });
+
+    return res.status(200).json({ token: token });
+  }
+  catch(err)
   {
-    return res.status(401).json(apiError.Unauthorized);
+    next(err);
   }
-
-  let token = jwt.sign(username, security.tokenSecret);
-  let session = await context.Session.create({
-    token: token,
-    user_id: user.id
-  });
-
-  return res.status(200).json({ token: token });
 });
 
 router.use(authenticationMiddleware());
 
-router.get('/logout', async (req, res) =>
+router.get('/logout', async (req, res, next) =>
 {
   
   let username = req.username,
     token = req.token;
 
-  let user = await context.User.findOne({ username: username, include: context.Session });
-  if(user == null)
+  try
   {
-    return res.status(401).json(apiError.Unauthorized);
-  }
+    let user = await context.User.findOne({ username: username, include: context.Session });
+    if(user == null)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
 
-  let session = user.Sessions.filter(s => s.token == token)[0];
-  if(session == null)
+    let session = user.Sessions.filter(s => s.token == token)[0];
+    if(session == null)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
+    //await context.Session.destroy({ where: { id: session.id } });
+    await session.destroy();
+
+    return res.sendStatus(204);
+  }
+  catch(err)
   {
-    return res.status(401).json(apiError.Unauthorized);
+    next(err);
   }
-
-  //await context.Session.destroy({ where: { id: session.id } });
-  await session.destroy();
-
-  return res.sendStatus(204);
 });
 
 module.exports = router;
