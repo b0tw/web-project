@@ -150,8 +150,7 @@ router.post('/:id/deliverables', async (req, res) => {
     let id = parseInt(req.params.id),
       title = req.body.title,
       description = req.body.description,
-      url = req.body.url,
-      team_id = req.body.team_id;
+      url = req.body.url;
 
     //validating the received data
     if (isNaN(id) || title === null || title.length > 20
@@ -160,11 +159,11 @@ router.post('/:id/deliverables', async (req, res) => {
         return res.status(400).send(apiError.InvalidRequest);
     }
 
-    const team = await context.Team.findOne({ where: { id: team_id } })
+    const team = await context.Team.findOne({ where: { id: id } })
     if (team == null) {
         return res.status(400).send(apiError.InvalidRequest)
     }
-    const del = await context.Deliverable.create({ title, description, url, team_id })
+    const del = await context.Deliverable.create({ title: title, description: description, url: url, team_id: id })
 
     team.Deliverables.push(del);
     team.setDeliverables(team.Deliverables);
