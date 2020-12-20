@@ -4,8 +4,11 @@ const bcrypt = require('bcrypt');
 
 (async () => {
   await context.connection.authenticate();
-  context.connection.options.logging = true;
+  context.connection.options.logging = console.log;
+
+  await context.connection.query('SET FOREIGN_KEY_CHECKS = 0', null, {raw: true});
   await context.connection.sync({ force: true });
+  await context.connection.query('SET FOREIGN_KEY_CHECKS = 1', null, {raw: true});
 
   let hash = await bcrypt.hash('abc123', security.saltRounds);
   let users = await context.User.bulkCreate([
@@ -169,6 +172,4 @@ const bcrypt = require('bcrypt');
         JuryId: 1
       }
     });
-  // query to set the total_grade to the jury
-  // ..................
 })();
