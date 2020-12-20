@@ -5,7 +5,7 @@ const authentication = require('../middleware/authentication-middleware');
 const context = require('../entities/database/context')
 const apiError = require('../entities/api-error');
 
-router.post('/', async (req, res) =>
+router.post('/', async (req, res, next) =>
 {
   let username = req.body.username,
     surname = req.body.surname,
@@ -13,38 +13,45 @@ router.post('/', async (req, res) =>
     password = req.body.password,
     is_professor = req.body.is_professor;
 
-  if(username == null || username.match(/^[ ]*$/g)
-    || surname == null || surname.match(/^[ ]*$/g)
-    || name == null || name.match(/^[ ]*$/g)
-    || password == null || password.match(/^[ ]*$/g)
-    || is_professor == null || (is_professor !== 0 && is_professor !== 1))
+  try
   {
-    return res.status(400).json(apiError.InvalidRequest);
-  }
+    if(username == null || username.match(/^[ ]*$/g)
+      || surname == null || surname.match(/^[ ]*$/g)
+      || name == null || name.match(/^[ ]*$/g)
+      || password == null || password.match(/^[ ]*$/g)
+      || is_professor == null || (is_professor !== 0 && is_professor !== 1))
+    {
+      return res.status(400).json(apiError.InvalidRequest);
+    }
 
-  let passwdHash = await bcrypt.hash(password, security.saltRounds);
-  if(passwdHash == null)
-  {
-    return res.status(500).json(apiError.InternalError);
-  }
+    let passwdHash = await bcrypt.hash(password, security.saltRounds);
+    if(passwdHash == null)
+    {
+      return res.status(500).json(apiError.InternalError);
+    }
 
-  let user = await context.User.create({
-    username: username,
-    surname: surname,
-    name: name,
-    password: passwdHash,
-    is_professor: is_professor
-  });
-  if(user == null)
-  {
-    return res.status(500).json(apiError.InternalError);
+    let user = await context.User.create({
+      username: username,
+      surname: surname,
+      name: name,
+      password: passwdHash,
+      is_professor: is_professor
+    });
+    if(user == null)
+    {
+      return res.status(500).json(apiError.InternalError);
+    }
+    return res.status(200).json({ message: 'User created succesfully.' });
   }
-  return res.status(200).json({ message: 'User created succesfully.' });
+  catch(err)
+  {
+    next(err);
+  }
 });
 
 router.use(authentication());
 
-router.get('/', async (req, res) =>
+router.get('/', async (req, res, next) =>
 {
   let surname = req.query.surname,
     name = req.query.name;
@@ -69,11 +76,18 @@ router.get('/', async (req, res) =>
     };
   }
 
-  let users = await context.User.findAll(options);
-  return res.status(200).json(users);
+  try
+  {
+    let users = await context.User.findAll(options);
+    return res.status(200).json(users);
+  }
+  catch(err)
+  {
+    next(err);
+  }
 });
 
-router.put('/:id', async (req, res) =>
+router.put('/:id', async (req, res, next) =>
 {
   let id = parseInt(req.params.id),
     username = req.body.username,
@@ -81,44 +95,57 @@ router.put('/:id', async (req, res) =>
     name = req.body.name,
     password = req.body.password;
 
-  if(isNaN(id)
-    || username == null || username.match(/^[ ]*$/g)
-    || surname == null || surname.match(/^[ ]*$/g)
-    || name == null || name.match(/^[ ]*$/g)
-    || is_professor == null || !password.match(/^[01]*$/g))
+  try
   {
-    return res.status(400).json(apiError.InvalidRequest);
-  }
-
-  let user = await context.User.findOne({ id: id });
-  if(user == null)
-  {
-    return res.status(400).json(apiError.InvalidRequest);
-  }
-
-  let passwdHash = null;
-  if(password != null)
-  {
-    passwdHash = await bcrypt.hash(password, security.saltRounds);
-    if(passwdHash == null)
+    if(isNaN(id)
+      || username == null || username.match(/^[ ]*$/g)
+      || surname == null || surname.match(/^[ ]*$/g)
+      || name == null || name.match(/^[ ]*$/g)
+      || password == null || !password.match(/^[01]*$/g))
     {
-      return res.status(500).json(apiError.InternalError);
+      return res.status(400).json(apiError.InvalidRequest);
     }
-  }
 
-  user.username = username;
-  user.surname = surname;
-  user.name = name;
-  if(passwdHash != null)
+    let currentUser = await context.User.findOne({ where: { username: req.username } });
+    let user = await context.User.findOne({ id: id });
+    if(currentUser == null || user == null)
+    {
+      return res.status(400).json(apiError.InvalidRequest);
+    }
+    
+    if(currentUser.id != user.id && currentUser.is_professor == 0)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
+    let passwdHash = null;
+    if(password != null)
+    {
+      passwdHash = await bcrypt.hash(password, security.saltRounds);
+      if(passwdHash == null)
+      {
+        return res.status(500).json(apiError.InternalError);
+      }
+    }
+
+    user.username = username;
+    user.surname = surname;
+    user.name = name;
+    if(passwdHash != null)
+    {
+      user.password = passwdHash;
+    }
+    await user.save();
+
+    return res.status(200).json({ message: 'User data updated.' });
+  }
+  catch(err)
   {
-    user.password = passwdHash;
+    next(err);
   }
-  await user.save();
-
-  return res.status(200).json({ message: 'User data updated.' });
 });
 
-router.delete('/:id', async (req, res) =>
+router.delete('/:id', async (req, res, next) =>
 {
   let id = parseInt(req.params.id);
   if(isNaN(id))
@@ -126,30 +153,39 @@ router.delete('/:id', async (req, res) =>
     return res.status(400).json(apiError.InvalidRequest);
   }
 
-  let user = await context.User.findOne({ id: id, include: [ context.Project, context.Team, context.Session ] });
-  if(user == null)
+  try
   {
-    return res.status(400).json(apiError.InvalidRequest);
-  }
+    let currentUser = await context.User.findOne({ where: { username: req.username } });
+    let user = await context.User.findOne({ id: id, include: [ context.Team, context.Session ] });
+    if(currentUser == null || user == null)
+    {
+      return res.status(400).json(apiError.InvalidRequest);
+    }
+    
+    if(currentUser.id != user.id && currentUser.is_professor == 0)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
 
-  if(user.Project && user.Project.length > 0)
+    if(user.Team && user.Team.length > 0)
+    {
+      user.removeTeams(user.Team);
+    }
+
+    if(user.Session && user.Session.length > 0)
+    {
+      user.removeSessions(user.Session);
+    }
+
+    await user.save()
+    await user.destroy();
+
+    return res.sendStatus(204);
+  }
+  catch(err)
   {
-    user.removeProjects(user.Project);
+    next(err);
   }
-
-  if(user.Team && user.Team.length > 0)
-  {
-    user.removeTeams(user.Team);
-  }
-
-  if(user.Session && user.Session.length > 0)
-  {
-    user.removeSessions(user.Session);
-  }
-
-  await user.save()
-  await user.destroy();
-
-  return res.sendStatus(204);
 });
+
 module.exports = router
