@@ -16,13 +16,13 @@ router.post('/login', async (req, res, next) =>
     let user = await context.User.findOne({ where: { username: username }, include: [context.Session] });
     if(user == null)
     {
-      return res.status(401).json(apiError.Unauthorized);
+      return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
     let hash = await bcrypt.compare(password, user.password);
     if(hash == null)
     {
-      return res.status(401).json(apiError.Unauthorized);
+      return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
     let token = jwt.sign(username, security.tokenSecret);
