@@ -26,9 +26,9 @@ export default function NavbarMenu({ useAuthHandler })
     <Navbar color="dark" dark expand="md">
       <NavbarBrand href="/" className="mr-auto">AnonGrading</NavbarBrand>
       <NavbarToggler onClick={toggle} className="mr-2" />
-      <Collapse isOpen={!isCollapsed} navbar>
       { authHandler.isAuthenticated()
-        ? (<Nav navbar className="mr-auto">
+      ? (<Collapse isOpen={!isCollapsed} navbar>
+          <Nav navbar className="mr-auto">
             <NavItem className="mx-2">
               <Link to="/" className="text-light nav-link">Home</Link>
             </NavItem>
@@ -44,24 +44,26 @@ export default function NavbarMenu({ useAuthHandler })
             <NavItem className="mx-2">
               <Link to="/professors" className="text-light nav-link">Professors</Link>
             </NavItem>
-            <UncontrolledDropdown nav inNavbar className="mx-auto">
-              <DropdownToggle nav caret className="text-light">Welcome, {authHandler.getUsername()}!</DropdownToggle>
-              <DropdownMenu right className="bg-secondary">
-                <DropdownItem tag={Link} to="/profile" className="text-light dropdown-item-text-color">Profile</DropdownItem>
-                <DropdownItem divider />
-                <DropdownItem className="text-light dropdown-item-text-color" onClick={logout}>Logout</DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
-          </Nav>)
-        : (<Nav navbar className="mr-auto">
+          </Nav>
+          <UncontrolledDropdown inNavbar className="mr-2">
+            <DropdownToggle nav caret className="text-light">Welcome, {authHandler.getUsername()}!</DropdownToggle>
+            <DropdownMenu right className="bg-secondary">
+              <DropdownItem tag={Link} to="/profile" className="text-light dropdown-item-text-color">Profile</DropdownItem>
+              <DropdownItem divider />
+              <DropdownItem className="text-light dropdown-item-text-color" onClick={logout}>Logout</DropdownItem>
+            </DropdownMenu>
+          </UncontrolledDropdown>
+        </Collapse>)
+        : (<Collapse isOpen={!isCollapsed} navbar>
+          <Nav navbar className="mr-auto">
             <NavItem className="mx-2">
               <Link to="/sign-up" className="text-light">Sign up</Link>
             </NavItem>
             <NavItem className="mx-2 px-2 border border-white rounded">
               <Link to="/login" className="text-light">Login</Link>
             </NavItem>
-          </Nav>)}
-      </Collapse>
+          </Nav>
+        </Collapse>)}
     </Navbar>
   );
 }
