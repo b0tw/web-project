@@ -22,7 +22,7 @@ export default class ApiRequestHandler
       headers: this.getHeaders(headers),
     });
 
-    callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
+    await callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
   }
 
   async post(route, { query, body, headers }, callback)
@@ -34,7 +34,7 @@ export default class ApiRequestHandler
         body: body ? JSON.stringify(body) : null
       });
 
-    callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
+    await callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
   }
 
   async put(route, { query, body, headers }, callback)
@@ -45,7 +45,7 @@ export default class ApiRequestHandler
       body: body ? JSON.stringify(body) : null
     });
 
-    callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
+    await callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
   }
 
   async delete(route, { query, headers }, callback)
@@ -55,6 +55,6 @@ export default class ApiRequestHandler
       headers: this.getHeaders(headers),
     });
 
-    callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
+    await callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
   }
 }

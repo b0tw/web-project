@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardBody,
+  CardHeader,
   CardSubtitle,
   CardTitle,
   Col,
@@ -21,6 +22,48 @@ export default function Profile({ useAuthHandler })
   const authHandler = useAuthHandler();
   const [user, setUser] = useState({});
   const [error, setError] = useState('');
+  const renderTeams = () => {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle tag="h5">Teams</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <Container>
+            { user && user.Teams && user.Teams.length > 0 &&
+                user.Teams.map(t => <Row key={t.id}><Col md="3">{t.name}</Col><Col md="3">{t.project_name}</Col></Row>)
+            }
+            { !(user && user.Teams && user.Teams.length > 0) &&
+              <Row>
+                <Col>Not a member of a team.</Col>
+              </Row>
+            }
+          </Container>
+        </CardBody>
+      </Card>
+    );
+  }
+  const renderJuries = () => {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle tag="h5">Jury member</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <Container>
+            { user && user.Juries && user.Juries.length > 0 &&
+                user.Juries.map(j => <Row key={j.id}><Col md="3">Judges: </Col><Col md="3">{j.Team.name}</Col><Col md="3">{j.Team.project_name}</Col></Row>)
+            }
+            { !(user && user.Juries && user.Juries.length > 0) &&
+              <Row>
+                <Col>Not a jury of a team.</Col>
+              </Row>
+            }
+          </Container>
+        </CardBody>
+      </Card>
+    );
+  }
     
   console.log(user);
   useEffect(() => {
@@ -30,7 +73,18 @@ export default function Profile({ useAuthHandler })
       await requestHandler.get('/users', {
         query: `?username=${authHandler.getUsername()}`,
         headers: { Authorization: `Bearer ${authHandler.getToken()}` }
-      }, resp => resp && (resp.status !== 200 || resp.length < 1) ? setError(resp.message) : setUser(resp[0])))();
+      }, async resp => {
+        if (resp && (resp.status !== 200 || resp.length < 1))
+        {
+          setError(resp.message);
+        }
+        else
+        {
+          await requestHandler.get(`/users/${resp[0].id}`, {
+            headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+          }, userResp => userResp && userResp.status !== 200 ? setError(userResp.message) : setUser(userResp));
+        }
+      }))();
   }, [authHandler]);
 
   return (
@@ -57,6 +111,8 @@ export default function Profile({ useAuthHandler })
         </Col>
       </Row>
       }
+      {renderTeams()}
+      {renderJuries()}
     </Container>
   );
 }
