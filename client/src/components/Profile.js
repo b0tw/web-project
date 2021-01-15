@@ -14,6 +14,7 @@ import {
   ModalFooter,
   ModalHeader,
   Row,
+  Table
 } from 'reactstrap';
 import ApiRequestHandler from '../entities/ApiRequestHelper';
 
@@ -29,16 +30,29 @@ export default function Profile({ useAuthHandler })
           <CardTitle tag="h5">Teams</CardTitle>
         </CardHeader>
         <CardBody>
-          <Container>
-            { user && user.Teams && user.Teams.length > 0 &&
-                user.Teams.map(t => <Row key={t.id}><Col md="3">{t.name}</Col><Col md="3">{t.project_name}</Col></Row>)
-            }
-            { !(user && user.Teams && user.Teams.length > 0) &&
-              <Row>
-                <Col>Not a member of a team.</Col>
-              </Row>
-            }
-          </Container>
+          <Table striped responsive>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Team name</th>
+                <th>Project name</th>
+              </tr>
+            </thead>
+            <tbody>
+              { user && user.Teams && user.Teams.length > 0 &&
+                  user.Teams.map((t, i) => <tr key={t.id}>
+                    <th scope="row">{i + 1}</th>
+                    <th>{t.name}</th>
+                    <th>{t.project_name}</th>
+                  </tr>)
+              }
+              { !(user && user.Teams && user.Teams.length > 0) &&
+                <tr>
+                  <th colSpan="3">Not a member of a team.</th>
+                </tr>
+              }
+            </tbody>
+          </Table>
         </CardBody>
       </Card>
     );
@@ -47,23 +61,47 @@ export default function Profile({ useAuthHandler })
     return (
       <Card>
         <CardHeader>
-          <CardTitle tag="h5">Jury member</CardTitle>
+          <CardTitle tag="h5">Jury member in</CardTitle>
         </CardHeader>
         <CardBody>
-          <Container>
-            { user && user.Juries && user.Juries.length > 0 &&
-                user.Juries.map(j => <Row key={j.id}><Col md="3">Judges: </Col><Col md="3">{j.Team.name}</Col><Col md="3">{j.Team.project_name}</Col></Row>)
-            }
-            { !(user && user.Juries && user.Juries.length > 0) &&
-              <Row>
-                <Col>Not a jury of a team.</Col>
-              </Row>
-            }
-          </Container>
+          <Table striped responsive>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Team name</th>
+                <th>Project name</th>
+                <th>Graded awarded</th>
+                <th>Deadline to modify grade</th>
+              </tr>
+            </thead>
+            <tbody>
+              { user && user.Juries && user.Juries.length > 0 &&
+                  user.Juries.map((j, i) => <tr key={j.id}>
+                    <th scope="row">{i + 1}</th>
+                    <th>{j.Team.name}</th>
+                    <th>{j.Team.project_name}</th>
+                    <th>{j.UserJury.grade}</th>
+                    <th>{j.UserJury.deadline && j.UserJury.deadline.replace('T', ' ').substr(0, j.UserJury.deadline.length - 5)}</th>
+                  </tr>)
+              }
+              { !(user && user.Juries && user.Juries.length > 0) &&
+                <tr>
+                  <th colSpan="5">Not a jury of a team.</th>
+                </tr>
+              }
+            </tbody>
+          </Table>
         </CardBody>
       </Card>
     );
   }
+
+  const renderTeamsAndJuries = () => (
+      <Row xs="2">
+        <Col>{renderTeams()}</Col>
+        <Col>{renderJuries()}</Col>
+      </Row>
+  );
     
   console.log(user);
   useEffect(() => {
@@ -100,7 +138,7 @@ export default function Profile({ useAuthHandler })
         </ModalFooter>
       </Modal>
       { user && 
-      <Row>
+      <Row className="my-2 mb-3">
         <Col md="4" className="mx-auto">
           <Card>
             <CardBody>
@@ -111,8 +149,7 @@ export default function Profile({ useAuthHandler })
         </Col>
       </Row>
       }
-      {renderTeams()}
-      {renderJuries()}
+      {renderTeamsAndJuries()}
     </Container>
   );
 }
