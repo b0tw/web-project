@@ -103,7 +103,6 @@ export default function Profile({ useAuthHandler })
       </Row>
   );
     
-  console.log(user);
   useEffect(() => {
     const requestHandler = new ApiRequestHandler();
 
