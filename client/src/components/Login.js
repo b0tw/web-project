@@ -63,8 +63,8 @@ export default function Login({ useAuthHandler })
           </ModalFooter>
         </Modal>
 
-        <Container>
-          <Row className="py-2">
+        <Container className="py-2">
+          <Row>
             <Col md="4" className="mx-auto">
               <Card>
                 <CardBody>
