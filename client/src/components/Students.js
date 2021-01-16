@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Alert,
     Button,
@@ -16,39 +16,24 @@ import {
     Row,
     Table
 } from 'reactstrap';
-import { Redirect } from 'react-router-dom';
+import { Redirect, Link } from 'react-router-dom';
 import ApiRequestHandler from '../entities/ApiRequestHelper';
 
 export default function Students({ useAuthHandler }) {
     const authHandler = useAuthHandler();
-    const requestHandler = new ApiRequestHandler();
-    //request to get the students from the db
-    let students = [];
-    requestHandler.get('/users/', {
-        query: `?is_professor=0`,
-        headers: { Authorization: `Bearer ${authHandler.getToken()}` }
-    }, async resp => {
-        console.log(resp);
-        for (let i = 0; i < resp.length; i++) {
-            let student = {
-                id: resp[i].id,
-                username: resp[i].username,
-                surname: resp[i].surname,
-                name: resp[i].name
-            }
-            console.log(student);
-            students.append(student);
-        }
-    });
+
+    const [students, setStudents] = useState([]);
+
+
     const renderStudents = () => {
-        console.log(students);
+        console.log(students)
         return (
             <Card>
                 <CardHeader>
                     <CardTitle tag="h3">Student list</CardTitle>
                 </CardHeader>
                 <CardBody>
-                    <Table>
+                    <Table responsive striped hover>
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -57,14 +42,38 @@ export default function Students({ useAuthHandler }) {
                                 <th>Name</th>
                             </tr>
                         </thead>
-                        {/* afisam studentii */}
                         <tbody>
-
+                            {
+                                students && students.map((j, i) =>
+                                    <tr key={j.id} tag={Link} to={"/users/" + j.username}>
+                                        <th scope="row">{i + 1}</th>
+                                        <th>{j.username}</th>
+                                        <th>{j.surname}</th>
+                                        <th>{j.name}</th>
+                                    </tr>)
+                                
+                            }
                         </tbody>
                     </Table>
                 </CardBody></Card>
         )
     }
+    useEffect(() => {
+        const requestHandler = new ApiRequestHandler();
+        (async () => {
+            await requestHandler.get('/users/', {
+                query: `?is_professor=0`,
+                headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+            }, async resp => {
+                let stdnts = [];
+                for (let i = 0; i < Object.keys(resp).length - 1; i++) {
+                    stdnts.push(resp[i])
+                }
+                setStudents(stdnts)
+            }
+            );
+        })();
+    }, [authHandler]);
     return (
         renderStudents()
     )

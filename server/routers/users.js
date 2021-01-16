@@ -56,7 +56,8 @@ router.get('/', async (req, res, next) =>
 {
   let surname = req.query.surname,
     name = req.query.name,
-    username = req.query.username;
+    username = req.query.username,
+    is_professor = req.query.is_professor;
 
   let filters = [];
   if(surname != null)
@@ -71,7 +72,9 @@ router.get('/', async (req, res, next) =>
   {
     filters.push({ username: { [Op.eq]: `${username}` } });
   }
-
+  if(is_professor != null){
+    filters.push({is_professor:`%${is_professor}%`})
+  }
   let options = {
     attributes: [ 'id', 'username', 'surname', 'name', 'is_professor' ]
   };
