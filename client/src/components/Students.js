@@ -15,7 +15,7 @@ import {
     ModalHeader,
     Row,
     Table
-  } from 'reactstrap';
+} from 'reactstrap';
 import { Redirect } from 'react-router-dom';
 import ApiRequestHandler from '../entities/ApiRequestHelper';
 
@@ -23,11 +23,25 @@ export default function Students({ useAuthHandler }) {
     const authHandler = useAuthHandler();
     const requestHandler = new ApiRequestHandler();
     //request to get the students from the db
-    //requestHandler.get('/users/?is_professor=0', async(res) =>{
-    //    console.log(res.body);
-   // });
-
+    let students = [];
+    requestHandler.get('/users/', {
+        query: `?is_professor=0`,
+        headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+    }, async resp => {
+        console.log(resp);
+        for (let i = 0; i < resp.length; i++) {
+            let student = {
+                id: resp[i].id,
+                username: resp[i].username,
+                surname: resp[i].surname,
+                name: resp[i].name
+            }
+            console.log(student);
+            students.append(student);
+        }
+    });
     const renderStudents = () => {
+        console.log(students);
         return (
             <Card>
                 <CardHeader>
@@ -51,7 +65,7 @@ export default function Students({ useAuthHandler }) {
                 </CardBody></Card>
         )
     }
-    return(
+    return (
         renderStudents()
     )
 }
