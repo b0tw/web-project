@@ -11,6 +11,7 @@ import Login from './components/Login';
 import NavbarMenu from './components/NavbarMenu';
 import Profile from './components/Profile';
 import SignUp from './components/SignUp';
+import User from './components/User';
 
 function PrivateRoute({ useAuthHandler, children, ...rest })
 {
@@ -49,6 +50,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path="/profile" useAuthHandler={useAuthContext}>
               <Profile useAuthHandler={useAuthContext} />
+            </PrivateRoute>
+            <PrivateRoute exact path="/user/:username" useAuthHandler={useAuthContext}>
+              <User useAuthHandler={useAuthContext} />
             </PrivateRoute>
             
             <Route exact path="/login">

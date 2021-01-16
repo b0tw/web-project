@@ -4,6 +4,7 @@ const security = require('../entities/settings').security;
 const authentication = require('../middleware/authentication-middleware');
 const context = require('../entities/database/context')
 const apiError = require('../entities/api-error');
+const Op = require('sequelize').Op;
 
 router.post('/', async (req, res, next) =>
 {
@@ -55,20 +56,20 @@ router.get('/', async (req, res, next) =>
 {
   let surname = req.query.surname,
     name = req.query.name,
-    username = req.query.name;
+    username = req.query.username;
 
   let filters = [];
   if(surname != null)
   {
-    filters.push({ surname: `%${surname}%` });
+    filters.push({ surname: { [Op.eq]: `%${surname}%` } });
   }
   if(name != null)
   {
-    filters.push({ name: `%${name}%` });
+    filters.push({ name: { [Op.eq]: `%${name}%` } });
   }
   if(username != null)
   {
-    filters.push({ username: `%${username}%` });
+    filters.push({ username: { [Op.eq]: `${username}` } });
   }
 
   let options = {
@@ -77,7 +78,7 @@ router.get('/', async (req, res, next) =>
   if(filters.length > 0)
   {
     options['where'] = {
-        $or: filters
+        [Op.or]: filters
     };
   }
 
