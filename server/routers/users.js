@@ -54,7 +54,8 @@ router.use(authentication());
 router.get('/', async (req, res, next) =>
 {
   let surname = req.query.surname,
-    name = req.query.name;
+    name = req.query.name,
+    username = req.query.name;
 
   let filters = [];
   if(surname != null)
@@ -64,6 +65,10 @@ router.get('/', async (req, res, next) =>
   if(name != null)
   {
     filters.push({ name: `%${name}%` });
+  }
+  if(username != null)
+  {
+    filters.push({ username: `%${username}%` });
   }
 
   let options = {
@@ -80,6 +85,31 @@ router.get('/', async (req, res, next) =>
   {
     let users = await context.User.findAll(options);
     return res.status(200).json(users);
+  }
+  catch(err)
+  {
+    next(err);
+  }
+});
+
+router.get('/:id', async (req, res, next) =>
+{
+  let id = parseInt(req.params.id);
+
+    if(isNaN(id))
+    {
+      return res.status(400).json(apiError.InvalidRequest);
+    }
+
+  try
+  {
+    let user = await context.User.findOne({
+      where: { id: id },
+      include: [ { model: context.Jury, include: [ context.Team ] }, 
+        { model: context.Team } ]
+    });
+    user.password = null;
+    return res.status(200).json(user);
   }
   catch(err)
   {
