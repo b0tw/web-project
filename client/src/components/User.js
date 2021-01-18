@@ -22,9 +22,6 @@ import { useParams } from 'react-router-dom';
 const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) => {
   const requestHandler = new ApiRequestHandler();
   const deleteFromTeam = async (teamId, user) => {
-    user.status = null;
-    user.currentUser = null;
-
     await requestHandler.delete(`/teams/${teamId}/members`, {
       headers: { Authorization: `Bearer ${authHandler.getToken()}` },
       body: [{ id: user.id, username: user.username }]
@@ -46,7 +43,7 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
               <th>#</th>
               <th>Team name</th>
               <th>Project name</th>
-              <th></th>
+              {user.Teams && user.Teams.length > 0 && user.currentUser && user.currentUser.is_professor === 1 && <th></th>}
             </tr>
           </thead>
           <tbody>
@@ -55,7 +52,9 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
                   <th scope="row">{i + 1}</th>
                   <th>{t.name}</th>
                   <th>{t.project_name}</th>
+                  { user.currentUser && user.currentUser.is_professor === 1 &&
                   <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a member of team '${t.name}'?`, callback: async () => await deleteFromTeam(t.id, user) })}>Remove</Button></th>
+                  }
                 </tr>)
             }
             { !(user && user.Teams && user.Teams.length > 0) &&
@@ -70,7 +69,18 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
   );
 }
 
-const renderJuries = (authHandler, user, setSuccess) => {
+const renderJuries = (authHandler, user, setError, setSuccess, setConfirmation) => {
+  const requestHandler = new ApiRequestHandler();
+  const deleteFromTeam = async (teamId, user) => {
+    await requestHandler.delete(`/teams/${teamId}/juries`, {
+      headers: { Authorization: `Bearer ${authHandler.getToken()}` },
+      body: [{ id: user.id, username: user.username }]
+    }, resp => {
+      resp.status !== 200 ? setError(resp.message) : setSuccess(resp.message);
+      setConfirmation({require: false});
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -85,7 +95,7 @@ const renderJuries = (authHandler, user, setSuccess) => {
               <th>Project name</th>
               <th>Graded awarded</th>
               <th>Deadline to modify grade</th>
-              <th></th>
+              {user.Teams && user.Teams.length > 0 && user.currentUser && user.currentUser.is_professor === 1 && <th></th>}
             </tr>
           </thead>
           <tbody>
@@ -96,7 +106,9 @@ const renderJuries = (authHandler, user, setSuccess) => {
                   <th>{j.Team.project_name}</th>
                   <th>{j.UserJury.grade}</th>
                   <th>{j.UserJury.deadline && j.UserJury.deadline.replace('T', ' ').substr(0, j.UserJury.deadline.length - 5)}</th>
-                  <th><Button size="xs" color="danger">Remove</Button></th>
+                  { user.currentUser && user.currentUser.is_professor === 1 &&
+                  <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a jury of team '${j.Team.name}'?`, callback: async () => await deleteFromTeam(j.Team.id, user) })}>Remove</Button></th>
+                  }
                 </tr>)
             }
             { !(user && user.Juries && user.Juries.length > 0) &&
@@ -118,11 +130,12 @@ export default function User({ useAuthHandler })
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [confirmation, setConfirmation] = useState({ require: false });
+  const [isEdittingUserData, editUserData] = useState(false);
   const { username } = useParams();
   const renderTeamsAndJuries = () => user && user.is_professor === 0 ? (
       <Row xs="2">
         <Col>{renderTeams(authHandler, user, setError, setSuccess, setConfirmation)}</Col>
-        <Col>{renderJuries(authHandler, user, setSuccess)}</Col>
+        <Col>{renderJuries(authHandler, user, setError, setSuccess, setConfirmation)}</Col>
       </Row>
   ) : null;
   const getUserData = async (requestHandler) => {
@@ -174,7 +187,16 @@ export default function User({ useAuthHandler })
         </ModalBody>
 
         <ModalFooter>
-          <Button color="primary" onClick={() => setSuccess('')}>Ok</Button>
+          <Button color="primary" onClick={() => { window.location.reload(); setSuccess(''); }}>Ok</Button>
+        </ModalFooter>
+      </Modal>
+      <Modal isOpen={isEdittingUserData} toggle={() => editUserData(false)}>
+        <ModalHeader>Edit user data</ModalHeader>
+        <ModalBody>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={() => editUserData(false)}>Cancel</Button>
+          <Button color="danger" onClick={() => alert('ok')}>Save</Button>
         </ModalFooter>
       </Modal>
       <Row className="my-2 mb-3">
@@ -189,6 +211,7 @@ export default function User({ useAuthHandler })
               <CardBody>
                 <CardTitle tag="h4">{ user ? `${user.surname}, ${user.name}` : 'Could not find user.' }</CardTitle>
                 <CardSubtitle tag="h6" className="mb-2 text-muted">{ user ? (user.is_professor === 1 ? 'Professor' : 'Student') : null }</CardSubtitle>
+                {user && user.currentUser && user.currentUser.is_professor === 1 && <Button size="sm" color="primary" onClick={() => editUserData(true)}>Edit</Button>}
               </CardBody>
             }
           </Card> 

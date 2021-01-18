@@ -48,11 +48,12 @@ export default class ApiRequestHandler
     await callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
   }
 
-  async delete(route, { query, headers }, callback)
+  async delete(route, { query, body, headers }, callback)
   {
     const resp = await fetch(`${this.apiRoute}${route}${query ? query : ''}`, {
       method: 'DELETE',
       headers: this.getHeaders(headers),
+      body: body ? JSON.stringify(body) : null
     });
 
     await callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
