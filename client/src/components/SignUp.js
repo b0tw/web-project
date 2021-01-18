@@ -111,10 +111,6 @@ export default function SignUp({ useAuthHandler })
                       <Input id="name" name="name" type="text" placeholder="John" value={userData.name} onChange={handleChange} />
                     </FormGroup>
                     <FormGroup>
-                      <Label for="email">Email</Label>
-                      <Input id="email" name="email" type="email" placeholder="john.doe@mywebsite.com" value={userData.email} onChange={handleChange} />
-                    </FormGroup>
-                    <FormGroup>
                       <Label for="password">password</Label>
                       <Input id="password" name="password" type="password" placeholder="abc123" value={userData.password} onChange={handleChange} />
                     </FormGroup>

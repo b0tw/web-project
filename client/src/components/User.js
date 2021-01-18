@@ -9,6 +9,10 @@ import {
   CardTitle,
   Col,
   Container,
+  Form,
+  FormGroup,
+  Input,
+  Label,
   Modal,
   ModalBody,
   ModalFooter,
@@ -131,6 +135,7 @@ export default function User({ useAuthHandler })
   const [success, setSuccess] = useState('');
   const [confirmation, setConfirmation] = useState({ require: false });
   const [isEdittingUserData, editUserData] = useState(false);
+  const [userData, setUserData] = useState({});
   const { username } = useParams();
   const renderTeamsAndJuries = () => user && user.is_professor === 0 ? (
       <Row xs="2">
@@ -157,15 +162,44 @@ export default function User({ useAuthHandler })
       {
         await requestHandler.get(`/users/${resp[0].id}`, {
           headers: { Authorization: `Bearer ${authHandler.getToken()}` }
-        }, userResp => userResp && userResp.status !== 200 ? setError(userResp.message) : setUser({ ...userResp, currentUser: currentUser }));
+        }, userResp => {
+          if(userResp && userResp.status !== 200)
+          {
+            setError(userResp.message);
+          }
+          else
+          {
+            setUser({ ...userResp, currentUser: currentUser });
+            setUserData({ ...userResp });
+          }
+        });
       }
     });
+  };
+  const handleChange = e => {
+    let currentData = { ...userData };
+    if(e.target.type === 'checkbox')
+    {
+      currentData[e.target.name] = e.target.checked;
+    }
+    else
+    {
+      currentData[e.target.name] = e.target.value;
+    }
+    setUserData(currentData);
+  };
+  const saveUserData = async () => {
+    const requestHandler = new ApiRequestHandler();
+    await requestHandler.put(`/users/${user.id}`, {
+      headers: { Authorization: `Bearer ${authHandler.getToken()}` },
+      body: { ...userData }
+    }, resp => resp.status !== 200 ? setError(resp.message) : setSuccess(resp.message));
   };
 
   useEffect(() => {
     const requestHandler = new ApiRequestHandler();
     getUserData(requestHandler);
-  }, []);
+  }, [username]);
 
   return (
     <Container fluid='true' className="py-2 px-5">
@@ -192,12 +226,36 @@ export default function User({ useAuthHandler })
       </Modal>
       <Modal isOpen={isEdittingUserData} toggle={() => editUserData(false)}>
         <ModalHeader>Edit user data</ModalHeader>
-        <ModalBody>
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick={() => editUserData(false)}>Cancel</Button>
-          <Button color="danger" onClick={() => alert('ok')}>Save</Button>
-        </ModalFooter>
+        <Form onSubmit={e => e.preventDefault()} method="POST" className="text-left">
+          <ModalBody>
+            <FormGroup>
+              <Label for="username">Username</Label>
+              <Input id="username" name="username" type="text" placeholder="jdoe23" value={userData.username} onChange={handleChange} />
+            </FormGroup>
+            <FormGroup>
+              <Label for="surname">Surame</Label>
+              <Input id="surname" name="surname" type="text" placeholder="Doe" value={userData.surname} onChange={handleChange} />
+            </FormGroup>
+            <FormGroup>
+              <Label for="name">Name</Label>
+              <Input id="name" name="name" type="text" placeholder="John" value={userData.name} onChange={handleChange} />
+            </FormGroup>
+            <FormGroup>
+              <Label for="password">password</Label>
+              <Input id="password" name="password" type="password" placeholder="abc123" value={userData.password} onChange={handleChange} />
+            </FormGroup>
+            <FormGroup check>
+              <Label check>
+                <Input id="is_professor" type="checkbox" name="is_professor" checked={userData.is_professor} onChange={handleChange} />{' '}
+                Professor account.
+              </Label>
+            </FormGroup>
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={() => editUserData(false)}>Cancel</Button>
+            <Button color="danger" onClick={async () => { await saveUserData(); }}>Save</Button>
+          </ModalFooter>
+        </Form>
       </Modal>
       <Row className="my-2 mb-3">
         <Col md="4" className="mx-auto">
