@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Alert,
+  Button,
   Card,
   CardBody,
   CardHeader,
@@ -8,122 +9,174 @@ import {
   CardTitle,
   Col,
   Container,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Row,
   Table
 } from 'reactstrap';
 import ApiRequestHandler from '../entities/ApiRequestHelper';
 import { useParams } from 'react-router-dom';
 
+const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) => {
+  const requestHandler = new ApiRequestHandler();
+  const deleteFromTeam = async (teamId, user) => {
+    user.status = null;
+    user.currentUser = null;
+
+    await requestHandler.delete(`/teams/${teamId}/members`, {
+      headers: { Authorization: `Bearer ${authHandler.getToken()}` },
+      body: [{ id: user.id, username: user.username }]
+    }, resp => {
+      resp.status !== 200 ? setError(resp.message) : setSuccess(resp.message);
+      setConfirmation({require: false});
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle tag="h5">Teams</CardTitle>
+      </CardHeader>
+      <CardBody>
+        <Table striped responsive>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Team name</th>
+              <th>Project name</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            { user && user.Teams && user.Teams.length > 0 &&
+                user.Teams.map((t, i) => <tr key={t.id}>
+                  <th scope="row">{i + 1}</th>
+                  <th>{t.name}</th>
+                  <th>{t.project_name}</th>
+                  <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a member of team '${t.name}'?`, callback: async () => await deleteFromTeam(t.id, user) })}>Remove</Button></th>
+                </tr>)
+            }
+            { !(user && user.Teams && user.Teams.length > 0) &&
+              <tr>
+                <th colSpan="3">Not a member of a team.</th>
+              </tr>
+            }
+          </tbody>
+        </Table>
+      </CardBody>
+    </Card>
+  );
+}
+
+const renderJuries = (authHandler, user, setSuccess) => {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle tag="h5">Jury member in</CardTitle>
+      </CardHeader>
+      <CardBody>
+        <Table striped responsive>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Team name</th>
+              <th>Project name</th>
+              <th>Graded awarded</th>
+              <th>Deadline to modify grade</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            { user && user.Juries && user.Juries.length > 0 &&
+                user.Juries.map((j, i) => <tr key={j.id}>
+                  <th scope="row">{i + 1}</th>
+                  <th>{j.Team.name}</th>
+                  <th>{j.Team.project_name}</th>
+                  <th>{j.UserJury.grade}</th>
+                  <th>{j.UserJury.deadline && j.UserJury.deadline.replace('T', ' ').substr(0, j.UserJury.deadline.length - 5)}</th>
+                  <th><Button size="xs" color="danger">Remove</Button></th>
+                </tr>)
+            }
+            { !(user && user.Juries && user.Juries.length > 0) &&
+              <tr>
+                <th colSpan="5">Not a jury of a team.</th>
+              </tr>
+            }
+          </tbody>
+        </Table>
+      </CardBody>
+    </Card>
+  );
+}
+
 export default function User({ useAuthHandler })
 {
   const authHandler = useAuthHandler();
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [confirmation, setConfirmation] = useState({ require: false });
   const { username } = useParams();
-
-  const renderTeams = () => {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle tag="h5">Teams</CardTitle>
-        </CardHeader>
-        <CardBody>
-          <Table striped responsive>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Team name</th>
-                <th>Project name</th>
-              </tr>
-            </thead>
-            <tbody>
-              { user && user.Teams && user.Teams.length > 0 &&
-                  user.Teams.map((t, i) => <tr key={t.id}>
-                    <th scope="row">{i + 1}</th>
-                    <th>{t.name}</th>
-                    <th>{t.project_name}</th>
-                  </tr>)
-              }
-              { !(user && user.Teams && user.Teams.length > 0) &&
-                <tr>
-                  <th colSpan="3">Not a member of a team.</th>
-                </tr>
-              }
-            </tbody>
-          </Table>
-        </CardBody>
-      </Card>
-    );
-  }
-  const renderJuries = () => {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle tag="h5">Jury member in</CardTitle>
-        </CardHeader>
-        <CardBody>
-          <Table striped responsive>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Team name</th>
-                <th>Project name</th>
-                <th>Graded awarded</th>
-                <th>Deadline to modify grade</th>
-              </tr>
-            </thead>
-            <tbody>
-              { user && user.Juries && user.Juries.length > 0 &&
-                  user.Juries.map((j, i) => <tr key={j.id}>
-                    <th scope="row">{i + 1}</th>
-                    <th>{j.Team.name}</th>
-                    <th>{j.Team.project_name}</th>
-                    <th>{j.UserJury.grade}</th>
-                    <th>{j.UserJury.deadline && j.UserJury.deadline.replace('T', ' ').substr(0, j.UserJury.deadline.length - 5)}</th>
-                  </tr>)
-              }
-              { !(user && user.Juries && user.Juries.length > 0) &&
-                <tr>
-                  <th colSpan="5">Not a jury of a team.</th>
-                </tr>
-              }
-            </tbody>
-          </Table>
-        </CardBody>
-      </Card>
-    );
-  }
-
   const renderTeamsAndJuries = () => user && user.is_professor === 0 ? (
       <Row xs="2">
-        <Col>{renderTeams()}</Col>
-        <Col>{renderJuries()}</Col>
+        <Col>{renderTeams(authHandler, user, setError, setSuccess, setConfirmation)}</Col>
+        <Col>{renderJuries(authHandler, user, setSuccess)}</Col>
       </Row>
   ) : null;
+  const getUserData = async (requestHandler) => {
+    let currentUser;
+    await requestHandler.get('/users', {
+      query: `?username=${authHandler.getUsername()}`,
+      headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+    }, resp => resp.message ? setError(resp.message) : currentUser = resp[0]);
+
+    await requestHandler.get('/users', {
+      query: `?username=${username}`,
+      headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+    }, async resp => {
+      if (resp && (resp.status !== 200 || resp.length < 1))
+      {
+        setError(resp.message);
+      }
+      else if(resp && resp[0])
+      {
+        await requestHandler.get(`/users/${resp[0].id}`, {
+          headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+        }, userResp => userResp && userResp.status !== 200 ? setError(userResp.message) : setUser({ ...userResp, currentUser: currentUser }));
+      }
+    });
+  };
 
   useEffect(() => {
     const requestHandler = new ApiRequestHandler();
-
-    (async () => 
-      await requestHandler.get('/users', {
-        query: `?username=${username}`,
-        headers: { Authorization: `Bearer ${authHandler.getToken()}` }
-      }, async resp => {
-        if (resp && (resp.status !== 200 || resp.length < 1))
-        {
-          setError(resp.message);
-        }
-        else if(resp && resp[0])
-        {
-          await requestHandler.get(`/users/${resp[0].id}`, {
-            headers: { Authorization: `Bearer ${authHandler.getToken()}` }
-          }, userResp => userResp && userResp.status !== 200 ? setError(userResp.message) : setUser(userResp));
-        }
-      }))();
-  }, [authHandler, username]);
+    getUserData(requestHandler);
+  }, []);
 
   return (
-    <Container className="py-2">
+    <Container fluid='true' className="py-2 px-5">
+      <Modal isOpen={confirmation.require} toggle={() => setConfirmation({require: false})}>
+        <ModalHeader>Remove from team</ModalHeader>
+        <ModalBody>
+          <Alert color="danger">{confirmation.message}</Alert>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={() => setConfirmation({ require: false })}>Cancel</Button>
+          <Button color="danger" onClick={confirmation.callback}>Remove</Button>
+        </ModalFooter>
+      </Modal>
+      <Modal isOpen={success.length > 0} toggle={() => setSuccess('')}>
+        <ModalHeader>Account created.</ModalHeader>
+        
+        <ModalBody>
+          <Alert color="success">{success}</Alert>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button color="primary" onClick={() => setSuccess('')}>Ok</Button>
+        </ModalFooter>
+      </Modal>
       <Row className="my-2 mb-3">
         <Col md="4" className="mx-auto">
           <Card>
