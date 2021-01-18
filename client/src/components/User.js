@@ -193,7 +193,17 @@ export default function User({ useAuthHandler })
     await requestHandler.put(`/users/${user.id}`, {
       headers: { Authorization: `Bearer ${authHandler.getToken()}` },
       body: { ...userData }
-    }, resp => resp.status !== 200 ? setError(resp.message) : setSuccess(resp.message));
+    }, resp => {
+      if(resp.status !== 200)
+      {
+        editUserData(false);
+        setError(resp.message);
+      }
+      else
+      {
+        setSuccess(resp.message);
+      }
+    });
   };
 
   useEffect(() => {
