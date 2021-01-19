@@ -29,6 +29,25 @@ export default function UsersTable({ useAuthHandler, onlyStudents, onlyProfessor
         }, resp => resp.status === 204 ? setSuccess(`Successfully removed user.`) : setError('Could not remove user. Please try again later.'));
     };
 
+    const renderRemoveButton = id =>
+    {
+        if(!onlyProfessors && currentUser && currentUser.is_professor)
+        {
+            return (<th><Button size="xs" color="danger" onClick={async () => await deleteUser(id)}>Remove</Button></th>);
+        }
+
+        return null;
+    }
+    const renderRemoveButtonHeader = _ =>
+    {
+        if(!onlyProfessors && currentUser && currentUser.is_professor)
+        {
+            return (<th></th>);
+        }
+
+        return null;
+    }
+
     const renderUsers = () => {
         return (
                 <Card>
@@ -43,7 +62,7 @@ export default function UsersTable({ useAuthHandler, onlyStudents, onlyProfessor
                                     <th>Username</th>
                                     <th>Surname</th>
                                     <th>Name</th>
-                                    { !onlyProfessors && currentUser && currentUser.is_professor && <th></th> }
+                                    { renderRemoveButtonHeader() }
                                 </tr>
                             </thead>
                             <tbody>
@@ -53,8 +72,7 @@ export default function UsersTable({ useAuthHandler, onlyStudents, onlyProfessor
                                         <th><Link to={`/user/${j.username}`}>{j.username}</Link></th>
                                         <th>{j.surname}</th>
                                         <th>{j.name}</th>
-                                        { !onlyProfessors && currentUser && currentUser.is_professor &&
-                                        <th><Button size="xs" color="danger" onClick={async () => await deleteUser(j.id)}>Remove</Button></th> }
+                                        { renderRemoveButton(j.id) }
                                     </tr>)
                                 }
                             </tbody>
