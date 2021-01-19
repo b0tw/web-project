@@ -40,7 +40,7 @@ function App() {
 
   useEffect(async _ => {
     await authHandler.checkSession();
-  }, [authHandler]);
+  }, []);
   
   return (
     <div className="App">
