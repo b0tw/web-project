@@ -41,6 +41,26 @@ router.post('/login', async (req, res, next) =>
 
 router.use(authenticationMiddleware());
 
+router.head('/check-session', async (req, res, next) =>
+{
+  let username = req.username;
+
+  try
+  {
+    let user = await context.User.findOne({ username: username, include: context.Session });
+    if(user == null)
+    {
+      return res.status(401).json(apiError.Unauthorized);
+    }
+
+    return res.sendStatus(204);
+  }
+  catch(err)
+  {
+    next(err);
+  }
+});
+
 router.get('/logout', async (req, res, next) =>
 {
   
@@ -61,7 +81,6 @@ router.get('/logout', async (req, res, next) =>
       return res.status(401).json(apiError.Unauthorized);
     }
 
-    //await context.Session.destroy({ where: { id: session.id } });
     await session.destroy();
 
     return res.sendStatus(204);

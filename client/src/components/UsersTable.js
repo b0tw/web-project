@@ -25,7 +25,7 @@ export default function UsersTable({ useAuthHandler, onlyStudents, onlyProfessor
     const deleteUser = async id => {
         const requestHandler = new ApiRequestHandler();
         await requestHandler.delete(`/users/${id}`, {
-            headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+            headers: authHandler.getAthorizationHeader()
         }, resp => resp.status === 204 ? setSuccess(`Successfully removed user.`) : setError('Could not remove user. Please try again later.'));
     };
 
@@ -87,12 +87,12 @@ export default function UsersTable({ useAuthHandler, onlyStudents, onlyProfessor
         (async () => {
             await requestHandler.get('/users', {
                 query: `?username=${authHandler.getUsername()}`,
-                headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+                headers: authHandler.getAthorizationHeader()
             }, resp => resp.status === 200 && setCurrentUser(resp[0]));
 
             await requestHandler.get('/users', {
                 query: `?is_professor=${onlyStudents ? 0 : (onlyProfessors ? 1 : 0)}`,
-                headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+                headers: authHandler.getAthorizationHeader()
             }, async resp => {
                 let stdnts = [];
                 for (let i = 0; i < Object.keys(resp).length - 1; i++) {

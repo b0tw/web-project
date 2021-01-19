@@ -5,7 +5,7 @@ import {
   Redirect,
   Route,
 } from 'react-router-dom';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import AuthHandler from './entities/AuthHandler';
 import Login from './components/Login';
 import NavbarMenu from './components/NavbarMenu';
@@ -37,6 +37,10 @@ function App() {
   const [userState, setUserState] = useState(JSON.parse(localStorage.getItem('user-state')) || { username: '', token: null });
   const authHandler = new AuthHandler(userState, setUserState);
   const useAuthContext = () => useContext(authContext);
+
+  useEffect(async _ => {
+    await authHandler.checkSession();
+  }, [authHandler]);
   
   return (
     <div className="App">

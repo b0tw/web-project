@@ -27,7 +27,7 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
   const requestHandler = new ApiRequestHandler();
   const deleteFromTeam = async (teamId, user) => {
     await requestHandler.delete(`/teams/${teamId}/members`, {
-      headers: { Authorization: `Bearer ${authHandler.getToken()}` },
+      headers: authHandler.getAthorizationHeader(),
       body: [{ id: user.id, username: user.username }]
     }, resp => {
       resp.status !== 200 ? setError(resp.message) : setSuccess(resp.message);
@@ -86,7 +86,7 @@ const renderJuries = (authHandler, user, setError, setSuccess, setConfirmation) 
   const requestHandler = new ApiRequestHandler();
   const deleteFromTeam = async (teamId, user) => {
     await requestHandler.delete(`/teams/${teamId}/juries`, {
-      headers: { Authorization: `Bearer ${authHandler.getToken()}` },
+      headers: authHandler.getAthorizationHeader(),
       body: [{ id: user.id, username: user.username }]
     }, resp => {
       resp.status !== 200 ? setError(resp.message) : setSuccess(resp.message);
@@ -188,12 +188,12 @@ export default function User({ useAuthHandler })
     let currentUser;
     await requestHandler.get('/users', {
       query: `?username=${authHandler.getUsername()}`,
-      headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+      headers: authHandler.getAthorizationHeader()
     }, resp => resp.message ? setError(resp.message) : currentUser = resp[0]);
 
     await requestHandler.get('/users', {
       query: `?username=${username}`,
-      headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+      headers: authHandler.getAthorizationHeader()
     }, async resp => {
       if (resp && (resp.status !== 200 || resp.length < 1 || resp[0].name == null))
       {
@@ -202,8 +202,8 @@ export default function User({ useAuthHandler })
       else if(resp && resp[0])
       {
         await requestHandler.get(`/users/${resp[0].id}`, {
-          headers: { Authorization: `Bearer ${authHandler.getToken()}` }
-        }, async userResp => {
+          headers: authHandler.getAthorizationHeader()
+        }, userResp => {
           if(userResp && userResp.status !== 200)
           {
             setError(userResp.message);
@@ -238,7 +238,7 @@ export default function User({ useAuthHandler })
   const saveUserData = async () => {
     const requestHandler = new ApiRequestHandler();
     await requestHandler.put(`/users/${user.id}`, {
-      headers: { Authorization: `Bearer ${authHandler.getToken()}` },
+      headers: authHandler.getAthorizationHeader(),
       body: { ...userData }
     }, resp => {
       if(resp.status !== 200)
