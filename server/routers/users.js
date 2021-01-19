@@ -4,6 +4,7 @@ const security = require('../entities/settings').security;
 const authentication = require('../middleware/authentication-middleware');
 const context = require('../entities/database/context')
 const apiError = require('../entities/api-error');
+const Op = require('sequelize').Op;
 
 router.post('/', async (req, res, next) =>
 {
@@ -54,16 +55,21 @@ router.use(authentication());
 router.get('/', async (req, res, next) =>
 {
   let surname = req.query.surname,
-    name = req.query.name;
+    name = req.query.name,
+    username = req.query.username;
 
   let filters = [];
   if(surname != null)
   {
-    filters.push({ surname: `%${surname}%` });
+    filters.push({ surname: { [Op.eq]: `%${surname}%` } });
   }
   if(name != null)
   {
-    filters.push({ name: `%${name}%` });
+    filters.push({ name: { [Op.eq]: `%${name}%` } });
+  }
+  if(username != null)
+  {
+    filters.push({ username: { [Op.eq]: `${username}` } });
   }
 
   let options = {
@@ -72,7 +78,7 @@ router.get('/', async (req, res, next) =>
   if(filters.length > 0)
   {
     options['where'] = {
-        $or: filters
+        [Op.or]: filters
     };
   }
 
@@ -80,6 +86,31 @@ router.get('/', async (req, res, next) =>
   {
     let users = await context.User.findAll(options);
     return res.status(200).json(users);
+  }
+  catch(err)
+  {
+    next(err);
+  }
+});
+
+router.get('/:id', async (req, res, next) =>
+{
+  let id = parseInt(req.params.id);
+
+    if(isNaN(id))
+    {
+      return res.status(400).json(apiError.InvalidRequest);
+    }
+
+  try
+  {
+    let user = await context.User.findOne({
+      where: { id: id },
+      include: [ { model: context.Jury, include: [ context.Team ] }, 
+        { model: context.Team } ]
+    });
+    user.password = null;
+    return res.status(200).json(user);
   }
   catch(err)
   {
@@ -100,8 +131,7 @@ router.put('/:id', async (req, res, next) =>
     if(isNaN(id)
       || username == null || username.match(/^[ ]*$/g)
       || surname == null || surname.match(/^[ ]*$/g)
-      || name == null || name.match(/^[ ]*$/g)
-      || password == null || !password.match(/^[01]*$/g))
+      || name == null || name.match(/^[ ]*$/g))
     {
       return res.status(400).json(apiError.InvalidRequest);
     }

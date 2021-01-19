@@ -50,7 +50,7 @@ const bcrypt = require('bcrypt');
     }
     ,
     {
-      username: 'jblack',
+      username: 'jsnow',
       surname: 'Snow',
       name: 'John',
       password: hash,

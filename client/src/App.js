@@ -9,8 +9,8 @@ import { createContext, useContext, useState } from 'react';
 import AuthHandler from './entities/AuthHandler';
 import Login from './components/Login';
 import NavbarMenu from './components/NavbarMenu';
-import Profile from './components/Profile';
 import SignUp from './components/SignUp';
+import User from './components/User';
 
 function PrivateRoute({ useAuthHandler, children, ...rest })
 {
@@ -47,8 +47,8 @@ function App() {
             <PrivateRoute exact path="/" useAuthHandler={useAuthContext}>
               <h1>Hello</h1>
             </PrivateRoute>
-            <PrivateRoute exact path="/profile" useAuthHandler={useAuthContext}>
-              <Profile useAuthHandler={useAuthContext} />
+            <PrivateRoute exact path="/user/:username" useAuthHandler={useAuthContext}>
+              <User useAuthHandler={useAuthContext} />
             </PrivateRoute>
             
             <Route exact path="/login">

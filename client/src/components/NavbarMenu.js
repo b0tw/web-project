@@ -48,7 +48,7 @@ export default function NavbarMenu({ useAuthHandler })
           <UncontrolledDropdown inNavbar className="mr-2">
             <DropdownToggle nav caret className="text-light">Welcome, {authHandler.getUsername()}!</DropdownToggle>
             <DropdownMenu right className="bg-secondary">
-              <DropdownItem tag={Link} to="/profile" className="text-light dropdown-item-text-color">Profile</DropdownItem>
+              <DropdownItem tag={Link} to={`/user/${authHandler.getUsername()}`} className="text-light dropdown-item-text-color">Profile</DropdownItem>
               <DropdownItem divider />
               <DropdownItem className="text-light dropdown-item-text-color" onClick={logout}>Logout</DropdownItem>
             </DropdownMenu>
