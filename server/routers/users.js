@@ -66,7 +66,7 @@ router.get('/', async (req, res, next) => {
     filters.push({ username: { [Op.eq]: `${username}` } });
   }
   if (is_professor === 0 || is_professor === 1) {
-    filters.push({ is_professor: `%${is_professor}%` })
+    filters.push({ is_professor: is_professor })
   }
 
   let options = {

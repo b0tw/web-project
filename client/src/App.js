@@ -11,7 +11,7 @@ import Login from './components/Login';
 import NavbarMenu from './components/NavbarMenu';
 import SignUp from './components/SignUp';
 import User from './components/User';
-import Students from './components/Students';
+import UsersTable from './components/UsersTable';
 
 function PrivateRoute({ useAuthHandler, children, ...rest })
 {
@@ -52,7 +52,10 @@ function App() {
               <User useAuthHandler={useAuthContext} />
             </PrivateRoute>
             <PrivateRoute exact path="/students" useAuthHandler={useAuthContext}>
-              <Students useAuthHandler={useAuthContext}/>
+              <UsersTable onlyStudents={true} useAuthHandler={useAuthContext}/>
+            </PrivateRoute>
+            <PrivateRoute exact path="/professors" useAuthHandler={useAuthContext}>
+              <UsersTable onlyProfessors={true} useAuthHandler={useAuthContext}/>
             </PrivateRoute>
             <Route exact path="/login">
               <Login useAuthHandler={useAuthContext} />
