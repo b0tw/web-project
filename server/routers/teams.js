@@ -38,7 +38,7 @@ router.get('/:id', async (req, res, next) => {
       { model: context.Deliverable },
       { 
         model: context.Jury, include: [
-          { model: context.User, attributes: [ 'id' ] }
+          { model: context.User }
         ]
       }
     ]});
@@ -46,7 +46,11 @@ router.get('/:id', async (req, res, next) => {
       return res.status(400).send(apiError.InvalidRequest);
     }
 
-    return res.status(200).json(team);
+    let result = team.get({ plain: true });
+    result.Jury.grades = result.Jury.Users.map(u => u.UserJury.grade);
+    result.Jury.Users = null;
+
+    return res.status(200).json(result);
   }
   catch(err)
   {

@@ -35,6 +35,29 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
     });
   };
 
+  const renderTeamsHeader = _ =>
+  {
+    return (<tr>
+      <th>#</th>
+      <th>Team name</th>
+      <th>Project name</th>
+      <th>Grade</th>
+      {user.Teams && user.Teams.length > 0 && user.currentUser && user.currentUser.is_professor === 1 && <th></th>}
+    </tr>);
+  };
+  const renderTeamRow = (t, i) =>
+  {
+    return (<tr key={t.id}>
+      <th scope="row">{i + 1}</th>
+      <th>{t.name}</th>
+      <th>{t.project_name}</th>
+      <th>{(t.Jury.grades.reduce((sum, g) => sum + g, 0) / t.Jury.grades.length).toFixed(2)}</th>
+      { user.currentUser && user.currentUser.is_professor === 1 &&
+      <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a member of team '${t.name}'?`, callback: async () => await deleteFromTeam(t.id, user) })}>Remove</Button></th>
+      }
+    </tr>);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -43,24 +66,10 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
       <CardBody>
         <Table striped responsive>
           <thead>
-            <tr>
-              <th>#</th>
-              <th>Team name</th>
-              <th>Project name</th>
-              {user.Teams && user.Teams.length > 0 && user.currentUser && user.currentUser.is_professor === 1 && <th></th>}
-            </tr>
+            { renderTeamsHeader() }
           </thead>
           <tbody>
-            { user && user.Teams && user.Teams.length > 0 &&
-                user.Teams.map((t, i) => <tr key={t.id}>
-                  <th scope="row">{i + 1}</th>
-                  <th>{t.name}</th>
-                  <th>{t.project_name}</th>
-                  { user.currentUser && user.currentUser.is_professor === 1 &&
-                  <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a member of team '${t.name}'?`, callback: async () => await deleteFromTeam(t.id, user) })}>Remove</Button></th>
-                  }
-                </tr>)
-            }
+            { user && user.Teams && user.Teams.length > 0 && user.Teams.map((t, i) => renderTeamRow(t, i)) }
             { !(user && user.Teams && user.Teams.length > 0) &&
               <tr>
                 <th colSpan="3">Not a member of a team.</th>
@@ -85,6 +94,56 @@ const renderJuries = (authHandler, user, setError, setSuccess, setConfirmation) 
     });
   };
 
+  const renderJuriesHeader = _ =>
+  {
+    if(user.currentUser.username === user.username)
+    {
+      return (
+        <tr>
+          <th>#</th>
+          <th>Team name</th>
+          <th>Project name</th>
+          <th>Graded awarded</th>
+          <th>Deadline to modify grade</th>
+          {user.Teams && user.Teams.length > 0 && user.currentUser && user.currentUser.is_professor === 1 && <th></th>}
+        </tr>);
+    }
+
+    return (
+      <tr>
+        <th>#</th>
+        <th>Team name</th>
+        <th>Project name</th>
+        {user.Teams && user.Teams.length > 0 && user.currentUser && user.currentUser.is_professor === 1 && <th></th>}
+      </tr>);
+  };
+
+  const renderJuryRow = (j, i) =>
+  {
+    if(user.currentUser.username === user.username)
+    {
+      return (<tr key={j.id}>
+        <th scope="row">{i + 1}</th>
+        <th>{j.Team.name}</th>
+        <th>{j.Team.project_name}</th>
+        <th>{j.UserJury.grade}</th>
+        <th>{j.UserJury.deadline && j.UserJury.deadline.replace('T', ' ').substr(0, j.UserJury.deadline.length - 5)}</th>
+        { user.currentUser && user.currentUser.is_professor === 1 &&
+        <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a jury of team '${j.Team.name}'?`, callback: async () => await deleteFromTeam(j.Team.id, user) })}>Remove</Button></th>
+        }
+      </tr>);
+    }
+
+    return (<tr key={j.id}>
+      <th scope="row">{i + 1}</th>
+      <th>{j.Team.name}</th>
+      <th>{j.Team.project_name}</th>  
+      { user.currentUser && user.currentUser.is_professor === 1 &&
+      <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a jury of team '${j.Team.name}'?`, callback: async () => await deleteFromTeam(j.Team.id, user) })}>Remove</Button></th>
+      }
+    </tr>);
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -93,28 +152,10 @@ const renderJuries = (authHandler, user, setError, setSuccess, setConfirmation) 
       <CardBody>
         <Table striped responsive>
           <thead>
-            <tr>
-              <th>#</th>
-              <th>Team name</th>
-              <th>Project name</th>
-              <th>Graded awarded</th>
-              <th>Deadline to modify grade</th>
-              {user.Teams && user.Teams.length > 0 && user.currentUser && user.currentUser.is_professor === 1 && <th></th>}
-            </tr>
+              { renderJuriesHeader() }
           </thead>
           <tbody>
-            { user && user.Juries && user.Juries.length > 0 &&
-                user.Juries.map((j, i) => <tr key={j.id}>
-                  <th scope="row">{i + 1}</th>
-                  <th>{j.Team.name}</th>
-                  <th>{j.Team.project_name}</th>
-                  <th>{j.UserJury.grade}</th>
-                  <th>{j.UserJury.deadline && j.UserJury.deadline.replace('T', ' ').substr(0, j.UserJury.deadline.length - 5)}</th>
-                  { user.currentUser && user.currentUser.is_professor === 1 &&
-                  <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a jury of team '${j.Team.name}'?`, callback: async () => await deleteFromTeam(j.Team.id, user) })}>Remove</Button></th>
-                  }
-                </tr>)
-            }
+            { user && user.Juries && user.Juries.length > 0 && user.Juries.map((j, i) => renderJuryRow(j, i)) }
             { !(user && user.Juries && user.Juries.length > 0) &&
               <tr>
                 <th colSpan="5">Not a jury of a team.</th>
@@ -154,7 +195,6 @@ export default function User({ useAuthHandler })
       query: `?username=${username}`,
       headers: { Authorization: `Bearer ${authHandler.getToken()}` }
     }, async resp => {
-      console.log(resp)
       if (resp && (resp.status !== 200 || resp.length < 1 || resp[0].name == null))
       {
         setError(resp.message || 'Could not find user.');
@@ -163,13 +203,19 @@ export default function User({ useAuthHandler })
       {
         await requestHandler.get(`/users/${resp[0].id}`, {
           headers: { Authorization: `Bearer ${authHandler.getToken()}` }
-        }, userResp => {
+        }, async userResp => {
           if(userResp && userResp.status !== 200)
           {
             setError(userResp.message);
           }
           else
           {
+            for(let i = 0; i < userResp.Teams.length; ++i)
+            {
+              await requestHandler.get(`/teams/${userResp.Teams[i].id}`, {
+                headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+              }, teamResp => userResp.Teams[i].Jury = teamResp.Jury);
+            }
             setUser({ ...userResp, currentUser: currentUser });
             setUserData({ ...userResp });
           }
