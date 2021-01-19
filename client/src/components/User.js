@@ -203,7 +203,7 @@ export default function User({ useAuthHandler })
       {
         await requestHandler.get(`/users/${resp[0].id}`, {
           headers: authHandler.getAthorizationHeader()
-        }, userResp => {
+        }, async userResp => {
           if(userResp && userResp.status !== 200)
           {
             setError(userResp.message);
@@ -213,7 +213,7 @@ export default function User({ useAuthHandler })
             for(let i = 0; i < userResp.Teams.length; ++i)
             {
               await requestHandler.get(`/teams/${userResp.Teams[i].id}`, {
-                headers: { Authorization: `Bearer ${authHandler.getToken()}` }
+                headers: authHandler.getAthorizationHeader() 
               }, teamResp => userResp.Teams[i].Jury = teamResp.Jury);
             }
             setUser({ ...userResp, currentUser: currentUser });
