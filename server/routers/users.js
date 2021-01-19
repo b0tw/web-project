@@ -131,8 +131,7 @@ router.put('/:id', async (req, res, next) =>
     if(isNaN(id)
       || username == null || username.match(/^[ ]*$/g)
       || surname == null || surname.match(/^[ ]*$/g)
-      || name == null || name.match(/^[ ]*$/g)
-      || password == null || !password.match(/^[01]*$/g))
+      || name == null || name.match(/^[ ]*$/g))
     {
       return res.status(400).json(apiError.InvalidRequest);
     }

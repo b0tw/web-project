@@ -154,9 +154,10 @@ export default function User({ useAuthHandler })
       query: `?username=${username}`,
       headers: { Authorization: `Bearer ${authHandler.getToken()}` }
     }, async resp => {
-      if (resp && (resp.status !== 200 || resp.length < 1))
+      console.log(resp)
+      if (resp && (resp.status !== 200 || resp.length < 1 || resp[0].name == null))
       {
-        setError(resp.message);
+        setError(resp.message || 'Could not find user.');
       }
       else if(resp && resp[0])
       {
@@ -252,7 +253,7 @@ export default function User({ useAuthHandler })
             </FormGroup>
             <FormGroup>
               <Label for="password">password</Label>
-              <Input id="password" name="password" type="password" placeholder="abc123" value={userData.password} onChange={handleChange} />
+              <Input id="password" name="password" type="password" placeholder="******" value={userData.password} onChange={handleChange} />
             </FormGroup>
             <FormGroup check>
               <Label check>
@@ -267,22 +268,26 @@ export default function User({ useAuthHandler })
           </ModalFooter>
         </Form>
       </Modal>
+      <Modal isOpen={error.length > 0} toggle={() => setError('')}>
+        <ModalHeader>Error</ModalHeader>
+        <ModalBody>
+          <Alert color="danger">Could not find user. {error}</Alert>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={() => setError('')}>Ok</Button>
+        </ModalFooter>
+      </Modal>
       <Row className="my-2 mb-3">
         <Col md="4" className="mx-auto">
+          { user && error.length < 1 &&
           <Card>
-            { error.length > 0 &&
-            <CardBody>
-              <Alert color="danger">Could not find user. {error}</Alert>
-            </CardBody>
-            }
-            { error.length < 1 &&
               <CardBody>
-                <CardTitle tag="h4">{ user ? `${user.surname}, ${user.name}` : 'Could not find user.' }</CardTitle>
+                <CardTitle tag="h4">{ `${user.surname}, ${user.name}` }</CardTitle>
                 <CardSubtitle tag="h6" className="mb-2 text-muted">{ user ? (user.is_professor === 1 ? 'Professor' : 'Student') : null }</CardSubtitle>
-                {user && user.currentUser && user.currentUser.is_professor === 1 && <Button size="sm" color="primary" onClick={() => editUserData(true)}>Edit</Button>}
+                {user.currentUser && user.currentUser.is_professor === 1 && <Button size="sm" color="primary" onClick={() => editUserData(true)}>Edit</Button>}
               </CardBody>
-            }
           </Card> 
+          }
         </Col>
       </Row>
       {renderTeamsAndJuries()}
