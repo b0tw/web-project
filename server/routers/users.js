@@ -169,7 +169,7 @@ router.delete('/:id', async (req, res, next) => {
 
   try {
     let currentUser = await context.User.findOne({ where: { username: req.username } });
-    let user = await context.User.findOne({ id: id, include: [context.Team, context.Session] });
+    let user = await context.User.findOne({ where: { id: id }, include: [context.Team, context.Session] });
     if (currentUser == null || user == null) {
       return res.status(400).json(apiError.InvalidRequest);
     }
