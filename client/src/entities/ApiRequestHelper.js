@@ -25,6 +25,16 @@ export default class ApiRequestHandler
     await callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status, ...await resp.json() });
   }
 
+  async head(route, { headers }, callback)
+  {
+    const resp = await fetch(`${this.apiRoute}${route}`, {
+      method: 'HEAD',
+      headers: this.getHeaders(headers),
+    });
+
+    await callback(resp.status === 204 ? { status: resp.status }  : { status: resp.status });
+  }
+
   async post(route, { query, body, headers }, callback)
   {
       const resp = await fetch(`${this.apiRoute}${route}${query ? query : ''}`, {

@@ -10,6 +10,19 @@ export default class AuthHandler
     this.state = state;
     this.setState = setState;
   }
+  
+  async checkSession()
+  {
+    await this.requestHandler.head('/sessions/check-session', {
+      headers: this.getAthorizationHeader()
+    }, resp => {
+      if(resp.status !== 204)
+      {
+        this.setState({ username: '', token: null });
+        localStorage.removeItem('user-state');
+      }
+    });
+  }
 
   getUsername()
   {
