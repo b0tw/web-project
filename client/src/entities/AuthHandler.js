@@ -34,7 +34,7 @@ export default class AuthHandler
     return this.state.token;
   }
 
-  getAthorizationHeader()
+  getAuthorizationHeader()
   {
     return this.state.token ? { 'Authorization': `Bearer ${this.state.token}` } : null;
   }

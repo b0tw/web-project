@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom';
 import { createContext, useContext, useEffect, useState } from 'react';
 import AuthHandler from './entities/AuthHandler';
+import Grade from './components/Grade';
 import Login from './components/Login';
 import NavbarMenu from './components/NavbarMenu';
 import SignUp from './components/SignUp';
@@ -38,9 +39,7 @@ function App() {
   const authHandler = new AuthHandler(userState, setUserState);
   const useAuthContext = () => useContext(authContext);
 
-  useEffect(async _ => {
-    await authHandler.checkSession();
-  }, []);
+  useEffect(_ => (async _ => await authHandler.checkSession())(), []);
   
   return (
     <div className="App">
@@ -54,6 +53,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path="/user/:username" useAuthHandler={useAuthContext}>
               <User useAuthHandler={useAuthContext} />
+            </PrivateRoute>
+            <PrivateRoute exact path="/grade" useAuthHandler={useAuthContext}>
+              <Grade useAuthHandler={useAuthContext}></Grade>
             </PrivateRoute>
             <PrivateRoute exact path="/students" useAuthHandler={useAuthContext}>
               <UsersTable onlyStudents={true} useAuthHandler={useAuthContext}/>
