@@ -72,7 +72,7 @@ export default function UsersTable({ useAuthHandler, onlyStudents, onlyProfessor
                                         <th><Link to={`/user/${j.username}`}>{j.username}</Link></th>
                                         <th>{j.surname}</th>
                                         <th>{j.name}</th>
-                                        { renderRemoveButton() }
+                                        { renderRemoveButton(j.id) }
                                     </tr>)
                                 }
                             </tbody>
