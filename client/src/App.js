@@ -13,6 +13,7 @@ import NavbarMenu from './components/NavbarMenu';
 import SignUp from './components/SignUp';
 import User from './components/User';
 import UsersTable from './components/UsersTable';
+import Home from './components/Home';
 
 function PrivateRoute({ useAuthHandler, children, ...rest })
 {
@@ -49,7 +50,7 @@ function App() {
 
           <Switch>
             <PrivateRoute exact path="/" useAuthHandler={useAuthContext}>
-              <h1>Hello</h1>
+              <Home useAuthHandler={useAuthContext} />
             </PrivateRoute>
             <PrivateRoute exact path="/user/:username" useAuthHandler={useAuthContext}>
               <User useAuthHandler={useAuthContext} />
