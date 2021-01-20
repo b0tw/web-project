@@ -51,10 +51,13 @@ const renderTeams = (teams, setEditModalData, setGrade) =>
             <th>
               <Button color="primary"
                 onClick={() => {
-                  setGrade(getGradeFromJury(teams.userId, t.Jury))
+                  if(getGradeFromJury(teams.userId, t.Jury))
+                  {
+                    setGrade(getGradeFromJury(teams.userId, t.Jury));
+                  }
                   setEditModalData({ isOpen: true, teamId: t.id, deliverables: t.Deliverables });
                 }}>
-                {getGradeFromJury(teams.userId, t.Jury)}
+                {getGradeFromJury(teams.userId, t.Jury) || 'No grade'}
               </Button>
             </th>
             <th>{formatDeadlineDate(t.Jury.grades.filter(g => g.userId === teams.userId)[0])}</th>

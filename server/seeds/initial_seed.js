@@ -119,29 +119,15 @@ const bcrypt = require('bcrypt');
   teams[1].setJury(juries[1]);
   await teams[1].save();
 
-  juries[0].setUsers(users[2])
+  juries[0].setUsers([ users[2], users[3] ]);
   await juries[0].save();
-  juries[0].setUsers(users[3])
-  await juries[0].save();
-  juries[1].setUsers(users[0])
-  await juries[1].save();
-  juries[1].setUsers(users[1])
+  juries[1].setUsers([ users[0], users[1] ]);
   await juries[1].save();
 
   // one of the rows will not update
   // i think it has something to do with the async
   let deadline = new Date();
   deadline.setDate(deadline.getDate() + 1);
-  await context.UserJury.update({
-    grade: 7,
-    deadline: deadline
-  },
-    {
-      where: {
-        UserId: 2,
-        JuryId: 2
-      }
-    });
 
   await context.UserJury.update({
     grade: 10,
@@ -152,8 +138,7 @@ const bcrypt = require('bcrypt');
         UserId: 3,
         JuryId: 1
       }
-    });
-
+  });
   await context.UserJury.update({
     grade: 8,
     deadline: deadline
@@ -163,7 +148,28 @@ const bcrypt = require('bcrypt');
         UserId: 1,
         JuryId: 2
       }
-    });
+  });
+  await context.UserJury.update({
+    grade: 7,
+    deadline: deadline
+  },
+    {
+      where: {
+        UserId: 2,
+        JuryId: 2
+      }
+  });
+  // weird fix but no time
+  await context.UserJury.update({
+    grade: 7,
+    deadline: deadline
+  },
+    {
+      where: {
+        UserId: 2,
+        JuryId: 2
+      }
+  });
   await context.UserJury.update({
     grade: 9,
     deadline: deadline
@@ -173,5 +179,5 @@ const bcrypt = require('bcrypt');
         UserId: 4,
         JuryId: 1
       }
-    });
+  });
 })();
