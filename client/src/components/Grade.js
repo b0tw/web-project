@@ -14,6 +14,11 @@ import {
 } from 'reactstrap';
 import ApiRequestHelper from '../entities/ApiRequestHelper';
 
+const editGrade = _ =>
+{
+
+};
+
 const renderTeams = teams =>
 {
   const formatDeadlineDate = jury =>
@@ -26,7 +31,6 @@ const renderTeams = teams =>
     return null;
   };
 
-  console.log()
   return (
     <Table responsive striped hover>
       <thead>
@@ -45,7 +49,9 @@ const renderTeams = teams =>
             <th scope="row">{i + 1}</th>
             <th>{t.name}</th>
             <th>{t.project_name}</th>
-            <th>{t.Jury.grades.filter(g => g.userId === teams.userId)[0].value.toFixed(2)}</th>
+            <th>
+              <Button color="primary">{t.Jury.grades.filter(g => g.userId === teams.userId)[0].value.toFixed(2)}</Button>
+            </th>
             <th>{formatDeadlineDate(t.Jury.grades.filter(g => g.userId === teams.userId)[0])}</th>
           </tr>
         ))}

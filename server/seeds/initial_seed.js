@@ -129,10 +129,12 @@ const bcrypt = require('bcrypt');
   await juries[1].save();
 
   // one of the rows will not update
-  // i think it has something to do with the async 
+  // i think it has something to do with the async
+  let deadline = new Date();
+  deadline.setDate(deadline.getDate() + 1);
   await context.UserJury.update({
     grade: 7,
-    deadline: Date.now()
+    deadline: deadline
   },
     {
       where: {
@@ -143,7 +145,7 @@ const bcrypt = require('bcrypt');
 
   await context.UserJury.update({
     grade: 10,
-    deadline: Date.now()
+    deadline: deadline
   },
     {
       where: {
@@ -154,7 +156,7 @@ const bcrypt = require('bcrypt');
 
   await context.UserJury.update({
     grade: 8,
-    deadline: Date.now()
+    deadline: deadline
   },
     {
       where: {
@@ -164,7 +166,7 @@ const bcrypt = require('bcrypt');
     });
   await context.UserJury.update({
     grade: 9,
-    deadline: Date.now()
+    deadline: deadline
   },
     {
       where: {
