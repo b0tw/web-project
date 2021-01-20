@@ -25,13 +25,13 @@ const renderTeams = teams => {
       <th scope="row">{i + 1}</th>
       <th>{t.name}</th>
       <th>{t.project_name}</th>
-      <th>{(t.Jury.grades.reduce((sum, g) => sum + g, 0) / t.Jury.grades.length).toFixed(2)}</th>
+      <th>{t.grade}</th>
     </tr>);
   };
 
   return (
-    <Card>
-      <CardTitle tag="h5">Top teams today</CardTitle>
+    <Card className="py-2">
+      <CardTitle tag="h3" className="pt-2">Top teams today</CardTitle>
       <CardBody>
         <Table striped responsive>
           <thead>
@@ -63,7 +63,8 @@ export default function Home({ useAuthHandler })
     (async _ =>
     {
       await requestHandler.get('/teams', {
-        headers: authHandler.getAthorizationHeader()
+        query: `?sort=true`,
+        headers: authHandler.getAuthorizationHeader()
       }, resp => {
         let teams = [];
         if(resp.status === 200)
@@ -79,7 +80,7 @@ export default function Home({ useAuthHandler })
   }, [authHandler]);
 
   return (
-    <Container>
+    <Container className="py-2">
       {renderTeams(teams)}
     </Container>
   );

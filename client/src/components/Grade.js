@@ -171,7 +171,7 @@ const createEditModal = (authHandler, data, setData, grade, setGrade, setSuccess
               <tr key={i}>
                 <th>{d.title}</th>
                 <th>{d.description}</th>
-                <th><a className="link" href={d.url || 'https://google.com'} target="_blank">Open</a></th>
+                <th><a className="link" href={d.url || 'https://google.com'} rel="noreferrer" target="_blank">Open</a></th>
               </tr>
             ))}
             {!data.deliverables && (

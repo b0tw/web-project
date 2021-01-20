@@ -13,8 +13,21 @@ router.get('/', async (req, res, next) => {
   // get the all teams
   try
   {
-    const allTeams = await Team.findAll()
-    return res.status(200).send(allTeams)
+    const allTeams = await Team.findAll({ include: [ { model: context.Jury, include: [ context.User ] } ] })
+
+    let result = allTeams.map(t => t.get({ plain: true }));
+    result.forEach(t => {
+      const grades = t.Jury.Users.map(u => u.UserJury.grade);
+      t.grade = (grades.reduce((sum, g) => sum + g, 0) / grades.length).toFixed(2);
+      t.Jury = null;
+    });
+
+    if(req.query.sort && req.query.sort === 'true')
+    {
+      result = result.sort((a, b) => a.grade < b.grade ? 1 : ( a.grade > b.grade ? -1 : 0 ));
+    }
+
+    return res.status(200).send(result);
   }
   catch(err)
   {
