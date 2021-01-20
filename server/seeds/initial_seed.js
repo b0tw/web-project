@@ -145,7 +145,7 @@ const bcrypt = require('bcrypt');
 
   await context.UserJury.update({
     grade: 10,
-    deadline: deadline
+    deadline: new Date()
   },
     {
       where: {

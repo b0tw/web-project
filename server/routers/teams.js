@@ -443,7 +443,7 @@ router.post('/:id/grade', async (req, res, next) =>
       return res.status(400).json(apiError.InvalidRequest);
     }
 
-    const team = await context.Team.findOne({ where: { id: id }, include: [ { model: context.Jury, include: [ context.UserJury ] } ] })
+    const team = await context.Team.findOne({ where: { id: id }, include: [ { model: context.Jury, include: [ context.User ] } ] })
     if(team == null) {
         return res.status(400).send(apiError.InvalidRequest)
     }
@@ -454,12 +454,12 @@ router.post('/:id/grade', async (req, res, next) =>
         return res.status(400).send(apiError.InvalidRequest);
     }
 
-    if(team.Jury.User.find(u => u.id == user.id) == null)
+    if(team.Jury.Users.find(u => u.id == user.id) == null)
     {
       return res.status(401).json(apiError.Unauthorized);
     }
 
-    let userJury = team.Jury.UserJury.find(uj => uj.user_id == user.id);
+    let userJury = team.Jury.Users.find(u => u.id == user.id).UserJury;
     if(userJury)
     {
       if(userJury.deadline < new Date())
