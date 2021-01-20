@@ -14,22 +14,23 @@ import SignUp from './components/SignUp';
 import User from './components/User';
 import UsersTable from './components/UsersTable';
 import Home from './components/Home';
+import TeamsTable from './components/TeamsTable';
+import Team from './components/Team';
 
-function PrivateRoute({ useAuthHandler, children, ...rest })
-{
+function PrivateRoute({ useAuthHandler, children, ...rest }) {
   const authHandler = useAuthHandler();
 
   return (
     <Route {...rest}
       render={({ location }) =>
-      authHandler.isAuthenticated() ? (
-        children
-      ) : (
-        <Redirect to={{
-          pathname: '/login',
-          state: { from: location }
-        }} />
-      )} />
+        authHandler.isAuthenticated() ? (
+          children
+        ) : (
+            <Redirect to={{
+              pathname: '/login',
+              state: { from: location }
+            }} />
+          )} />
   );
 }
 
@@ -59,10 +60,16 @@ function App() {
               <Grade useAuthHandler={useAuthContext}></Grade>
             </PrivateRoute>
             <PrivateRoute exact path="/students" useAuthHandler={useAuthContext}>
-              <UsersTable onlyStudents={true} useAuthHandler={useAuthContext}/>
+              <UsersTable onlyStudents={true} useAuthHandler={useAuthContext} />
             </PrivateRoute>
             <PrivateRoute exact path="/professors" useAuthHandler={useAuthContext}>
-              <UsersTable onlyProfessors={true} useAuthHandler={useAuthContext}/>
+              <UsersTable onlyProfessors={true} useAuthHandler={useAuthContext} />
+            </PrivateRoute>
+            <PrivateRoute exact path="/teams" useAuthHandler={useAuthContext}>
+              <TeamsTable useAuthHandler={useAuthContext}></TeamsTable>
+            </PrivateRoute>
+            <PrivateRoute exact path="/teams/:teamId" useAuthHandler={useAuthContext}>
+              <Team useAuthHandler={useAuthContext} />
             </PrivateRoute>
             <Route exact path="/login">
               <Login useAuthHandler={useAuthContext} />

@@ -51,7 +51,7 @@ router.get('/:id', async (req, res, next) => {
   try
   {
     let team = await context.Team.findOne({ where: { id: id }, include: [
-      { model: context.User, attributes: ['id', 'surname', 'name'] },
+      { model: context.User, attributes: ['id', 'username','surname', 'name'] },
       { model: context.Deliverable },
       { 
         model: context.Jury, include: [
@@ -118,14 +118,13 @@ router.delete('/:id', async (req, res, next) => {
   try
   {
     //search in the db the user
-    const user = await User.findOne({ where: username })
+    const user = await User.findOne({ where: {username:username} })
 
     //if the user is a professor, the deletion can happen
     if (user && user.is_professor == 1) {
       const id = req.params.id
-      const team = await Team.findOne({ where: { id }, include: [context.User, context.Deliverables, context.Jury ] })
+      const team = await Team.findOne({ where: { id:id }, include: [context.User, context.Deliverable, context.Jury ] })
 
-      team.removeProjects(team.Projects);
       team.removeUsers(team.Users);
       team.removeDeliverables(team.Deliverables);
       team.removeDeliverables(team.Jury);
@@ -233,10 +232,9 @@ router.post('/:id/deliverables', async (req, res, next) => {
     title = req.body.title,
     description = req.body.description,
     url = req.body.url;
-
   //validating the received data
-  if (isNaN(id) || title === null || title.length > 20
-    || description == null || description.length > 200
+  if (isNaN(id) || title === null || title.length < 10
+    || description == null || description.length < 10
     || url === null) {
       return res.status(400).send(apiError.InvalidRequest);
   }
@@ -249,7 +247,7 @@ router.post('/:id/deliverables', async (req, res, next) => {
       return res.status(401).json(apiError.Unauthorized);
     }
 
-    const team = await context.Team.findOne({ where: { id: id } })
+    const team = await context.Team.findOne({ where: { id: id }, include:[context.User, context.Deliverable] })
     if (team == null) {
         return res.status(400).send(apiError.InvalidRequest)
     }
@@ -333,11 +331,11 @@ router.delete('/:id/deliverables', async (req, res, next) => {
     }
 
     //validating the received data
-    if (isNaN(id) || typeof deliverables != 'object' || deliverables.some(d => typeof d.id == 'number')) {
+    if (isNaN(id) || typeof deliverables != 'object' || !deliverables.some(d => typeof d.id == 'number')) {
         return res.status(400).send(apiError.InvalidRequest);
     }
 
-    const team = await context.Team.findOne({ where: { id: id }, include: [ context.User ] })
+    const team = await context.Team.findOne({ where: { id: id }, include: [ context.User, context.Deliverable ] })
     if (team == null) {
         return res.status(400).send(apiError.InvalidRequest)
     }

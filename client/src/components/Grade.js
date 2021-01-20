@@ -127,7 +127,6 @@ const getTeamsData = async (requestHandler, authHandler, teams, setTeams, setErr
 
 const createEditModal = (authHandler, data, setData, grade, setGrade, setSuccess, setError) =>
 {
-  console.log(data.deliverables)
   const handleChange = e =>
   {
     if(e.target.value !== '')

@@ -55,11 +55,11 @@ router.get('/', async (req, res, next) => {
   let filters = [];
   if(surname != null)
   {
-    filters.push({ surname: { [Op.eq]: `%${surname}%` } });
+    filters.push({ surname: { [Op.like]: `%${surname}%` } });
   }
   if(name != null)
   {
-    filters.push({ name: { [Op.eq]: `%${name}%` } });
+    filters.push({ name: { [Op.like]: `%${name}%` } });
   }
   if(username != null)
   {
@@ -80,6 +80,7 @@ router.get('/', async (req, res, next) => {
 
   try {
     let users = await context.User.findAll(options);
+    console.log(options);
     return res.status(200).json(users);
   }
   catch (err) {
