@@ -15,7 +15,28 @@ import {
 } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import ApiRequestHandler from '../entities/ApiRequestHelper';
+const createModal = (color, message, toggle) => {
+    const btnClickEvent = async e => {
+        await toggle(e);
+        if (color === 'success') {
+            window.location.reload();
+        }
+    };
 
+    return (
+        <Modal isOpen={message.length > 0} toggle={toggle}>
+            <ModalHeader>{color === 'success' ? 'Success' : 'Error'}</ModalHeader>
+
+            <ModalBody>
+                <Alert color={color}>{message}</Alert>
+            </ModalBody>
+
+            <ModalFooter>
+                <Button color="primary" onClick={btnClickEvent}>Ok</Button>
+            </ModalFooter>
+        </Modal>
+    );
+};
 export default function TeamsTable({ useAuthHandler, onlyStudents, onlyProfessors }) {
     const authHandler = useAuthHandler();
     const [teams, setTeams] = useState(null);
@@ -27,11 +48,11 @@ export default function TeamsTable({ useAuthHandler, onlyStudents, onlyProfessor
         const requestHandler = new ApiRequestHandler();
         await requestHandler.delete(`/teams/${id}`, {
             headers: authHandler.getAuthorizationHeader()
-        }, resp => resp.status === 204 ? setSuccess(`Successfully removed team.`) : setError('Could not remove team. Please try again later.'));
+        }, resp => resp.status === 200 ? setSuccess(`Successfully removed team.`) : setError('Could not remove team. Please try again later.'));
     };
 
     const renderRemoveButton = id => {
-        if (!onlyProfessors && currentUser && currentUser.is_professor) {
+        if (currentUser && currentUser.is_professor) {
             return (<th><Button size="xs" color="danger" onClick={async () => await deleteTeam(id)}>Remove</Button></th>);
         }
 
@@ -47,6 +68,8 @@ export default function TeamsTable({ useAuthHandler, onlyStudents, onlyProfessor
     const renderTeams = () => {
         return (
             <Card>
+                {createModal('success', success, _ => setSuccess(''))}
+                {createModal('danger', error, _ => setError(''))}
                 <CardHeader>
                     <CardTitle tag="h3"> Teams</CardTitle>
                 </CardHeader>
