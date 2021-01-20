@@ -27,7 +27,7 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
   const requestHandler = new ApiRequestHandler();
   const deleteFromTeam = async (teamId, user) => {
     await requestHandler.delete(`/teams/${teamId}/members`, {
-      headers: authHandler.getAthorizationHeader(),
+      headers: authHandler.getAuthorizationHeader(),
       body: [{ id: user.id, username: user.username }]
     }, resp => {
       resp.status !== 200 ? setError(resp.message) : setSuccess(resp.message);
@@ -51,7 +51,7 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
       <th scope="row">{i + 1}</th>
       <th>{t.name}</th>
       <th>{t.project_name}</th>
-      <th>{(t.Jury.grades.reduce((sum, g) => sum + g, 0) / t.Jury.grades.length).toFixed(2)}</th>
+      <th>{(t.Jury.grades.reduce((sum, g) => sum + g.value, 0) / t.Jury.grades.length).toFixed(2)}</th>
       { user.currentUser && user.currentUser.is_professor === 1 &&
       <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a member of team '${t.name}'?`, callback: async () => await deleteFromTeam(t.id, user) })}>Remove</Button></th>
       }
@@ -86,7 +86,7 @@ const renderJuries = (authHandler, user, setError, setSuccess, setConfirmation) 
   const requestHandler = new ApiRequestHandler();
   const deleteFromTeam = async (teamId, user) => {
     await requestHandler.delete(`/teams/${teamId}/juries`, {
-      headers: authHandler.getAthorizationHeader(),
+      headers: authHandler.getAuthorizationHeader(),
       body: [{ id: user.id, username: user.username }]
     }, resp => {
       resp.status !== 200 ? setError(resp.message) : setSuccess(resp.message);
@@ -188,12 +188,12 @@ export default function User({ useAuthHandler })
     let currentUser;
     await requestHandler.get('/users', {
       query: `?username=${authHandler.getUsername()}`,
-      headers: authHandler.getAthorizationHeader()
+      headers: authHandler.getAuthorizationHeader()
     }, resp => resp.message ? setError(resp.message) : currentUser = resp[0]);
 
     await requestHandler.get('/users', {
       query: `?username=${username}`,
-      headers: authHandler.getAthorizationHeader()
+      headers: authHandler.getAuthorizationHeader()
     }, async resp => {
       if (resp && (resp.status !== 200 || resp.length < 1 || resp[0].name == null))
       {
@@ -202,7 +202,7 @@ export default function User({ useAuthHandler })
       else if(resp && resp[0])
       {
         await requestHandler.get(`/users/${resp[0].id}`, {
-          headers: authHandler.getAthorizationHeader()
+          headers: authHandler.getAuthorizationHeader()
         }, async userResp => {
           if(userResp && userResp.status !== 200)
           {
@@ -213,7 +213,7 @@ export default function User({ useAuthHandler })
             for(let i = 0; i < userResp.Teams.length; ++i)
             {
               await requestHandler.get(`/teams/${userResp.Teams[i].id}`, {
-                headers: authHandler.getAthorizationHeader() 
+                headers: authHandler.getAuthorizationHeader() 
               }, teamResp => userResp.Teams[i].Jury = teamResp.Jury);
             }
             setUser({ ...userResp, currentUser: currentUser });
@@ -238,7 +238,7 @@ export default function User({ useAuthHandler })
   const saveUserData = async () => {
     const requestHandler = new ApiRequestHandler();
     await requestHandler.put(`/users/${user.id}`, {
-      headers: authHandler.getAthorizationHeader(),
+      headers: authHandler.getAuthorizationHeader(),
       body: { ...userData }
     }, resp => {
       if(resp.status !== 200)
