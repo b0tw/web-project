@@ -51,7 +51,7 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
       <th scope="row">{i + 1}</th>
       <th>{t.name}</th>
       <th>{t.project_name}</th>
-      <th>{(t.Jury.grades.reduce((sum, g) => sum + g, 0) / t.Jury.grades.length).toFixed(2)}</th>
+      <th>{(t.Jury.grades.reduce((sum, g) => sum + g.value, 0) / t.Jury.grades.length).toFixed(2)}</th>
       { user.currentUser && user.currentUser.is_professor === 1 &&
       <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a member of team '${t.name}'?`, callback: async () => await deleteFromTeam(t.id, user) })}>Remove</Button></th>
       }

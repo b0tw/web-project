@@ -14,7 +14,7 @@ export default class AuthHandler
   async checkSession()
   {
     await this.requestHandler.head('/sessions/check-session', {
-      headers: this.getAthorizationHeader()
+      headers: this.getAuthorizationHeader()
     }, resp => {
       if(resp.status !== 204)
       {
@@ -63,7 +63,7 @@ export default class AuthHandler
   async logout(callback)
   {
     await this.requestHandler.get('/sessions/logout', {
-      headers: this.getAthorizationHeader()
+      headers: this.getAuthorizationHeader()
     }, resp => {
       localStorage.removeItem('user-state');
       this.setState({ username: '', token: null });

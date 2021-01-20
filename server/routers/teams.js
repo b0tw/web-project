@@ -47,7 +47,7 @@ router.get('/:id', async (req, res, next) => {
     }
 
     let result = team.get({ plain: true });
-    result.Jury.grades = result.Jury.Users.map(u => u.UserJury.grade);
+    result.Jury.grades = result.Jury.Users.map(u => ({ value: u.UserJury.grade, deadline: u.UserJury.deadline, userId: u.id }));
     result.Jury.Users = null;
 
     return res.status(200).json(result);
