@@ -26,7 +26,7 @@ export default function TeamsTable({ useAuthHandler, onlyStudents, onlyProfessor
     const deleteTeam = async id => {
         const requestHandler = new ApiRequestHandler();
         await requestHandler.delete(`/teams/${id}`, {
-            headers: authHandler.getAthorizationHeader()
+            headers: authHandler.getAuthorizationHeader()
         }, resp => resp.status === 204 ? setSuccess(`Successfully removed team.`) : setError('Could not remove team. Please try again later.'));
     };
 
@@ -80,11 +80,11 @@ export default function TeamsTable({ useAuthHandler, onlyStudents, onlyProfessor
         (async () => {
             await requestHandler.get('/users', {
                 query: `?username=${authHandler.getUsername()}`,
-                headers: authHandler.getAthorizationHeader()
+                headers: authHandler.getAuthorizationHeader()
             }, resp => resp.status === 200 && setCurrentUser(resp[0]));
 
             await requestHandler.get('/teams', {
-                headers: authHandler.getAthorizationHeader()
+                headers: authHandler.getAuthorizationHeader()
             }, async resp => {
                 let teamList = [];
                 for (let i = 0; i < Object.keys(resp).length - 1; i++) {

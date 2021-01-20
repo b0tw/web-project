@@ -25,9 +25,37 @@ import {
     Table
 } from 'reactstrap';
 import ApiRequestHandler from '../entities/ApiRequestHelper';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
-export default function Team({ useAuthHandler, onlyStudents, onlyProfessors }) {
+
+const createModal = (color, message, toggle) =>
+{
+  const btnClickEvent = async e =>
+  {
+    await toggle(e);
+    if(color === 'success')
+    {
+      window.location.reload();
+    }
+  };
+
+  return (
+    <Modal isOpen={message.length > 0} toggle={toggle}>
+      <ModalHeader>{ color === 'success' ? 'Success' : 'Error' }</ModalHeader>
+      
+      <ModalBody>
+        <Alert color={color}>{message}</Alert>
+      </ModalBody>
+      
+      <ModalFooter>
+        <Button color="primary" onClick={btnClickEvent}>Ok</Button>
+      </ModalFooter>
+    </Modal>
+  );
+};
+
+
+export default function Team({ useAuthHandler }) {
     const authHandler = useAuthHandler();
     const [members, setMembers] = useState(null);
     const [deliverables, setDeliverables] = useState(null);
@@ -36,8 +64,9 @@ export default function Team({ useAuthHandler, onlyStudents, onlyProfessors }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [users, setUsers] = useState(null);
     const { teamId } = useParams();
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const toggle = () => setDropdownOpen(prevState => !prevState)
+    const [isMembersModalOpen, toggleMembersModal] = useState(false);
+    const [isDelivModalOpen, toggleDelivModal] = useState(false);
+    const requestHandler = new ApiRequestHandler();
 
     const renderMembers = () => {
         return (<Card>
@@ -52,17 +81,15 @@ export default function Team({ useAuthHandler, onlyStudents, onlyProfessors }) {
                             <th>Username</th>
                             <th>Surname</th>
                             <th>Name</th>
-                            {/* {renderRemoveButtonHeader()} */}
                         </tr>
                     </thead>
                     <tbody>
                         {members && members.map((j, i) =>
                             <tr key={j.id}>
                                 <th scope="row">{i + 1}</th>
-                                <th>{j.username}</th>
+                                <th><Link to={`/users/${j.username}`}>{j.username}</Link></th>
                                 <th>{j.surname}</th>
                                 <th>{j.name}</th>
-                                {/* {renderRemoveButton(j.id)} */}
                             </tr>)
                         }
                     </tbody>
@@ -102,71 +129,155 @@ export default function Team({ useAuthHandler, onlyStudents, onlyProfessors }) {
             </CardBody>
         </Card>)
     }
-    // const getUsers = async () => {
-    //     const requestHandler = new ApiRequestHandler();
-    //     await requestHandler.get('/users', {
-    //         query: `?is_professor=${onlyStudents ? 0 : (onlyProfessors ? 1 : 0)}`,
-    //         headers: authHandler.getAthorizationHeader()
-    //     }, async resp => {
-    //         let stdnts = [];
-    //         for (let i = 0; i < Object.keys(resp).length - 1; i++) {
-    //             stdnts.push(resp[i])
-    //         }
-    //         setUsers(stdnts)
-    //     });
-    // };
-    const addMemberDropdown = () => {
-        console.log(users);
+    const handleChange = async (e) => {
+        await requestHandler.get('/users', {
+            query: `?name=${e.target.value}&surname=${e.target.value}`,
+            headers: authHandler.getAuthorizationHeader()
+        }, resp => {
+            if (resp.status !== 200) {
+                setError(resp.message)
+            }
+            else {
+                let users = [];
+                for (let i = 0; i < Object.keys(resp).length - 1; i++) {
+                    if (!members.some(m => m.username === resp[i].username) && resp[i].is_professor === 0)
+                        users.push(resp[i])
+                }
+                setUsers(users)
+            }
+        });
+    }
+    const addMember = async (username,id) => {
+        await requestHandler.post(`/teams/${teamId}/members`, {
+            body: [{username:username, id:id}],
+            headers: authHandler.getAuthorizationHeader()
+        }, resp => {
+            if (resp.status !== 200) {
+                setError(resp.message);
+            }
+            else {
+                setSuccess(resp.message);
+            }
+        });
+    }
+    const addDeliverableButton = () =>{
+        const delivModal = () => {
+            return (
+                <Modal isOpen={isDelivModalOpen} toggle={_ => toggleDelivModal(false)}>
+                    <ModalHeader>Add deliverable</ModalHeader>
+                    <ModalBody>
+                        <FormGroup>
+                            <Label for="filter">Filter</Label>
+                            <Input id="filter" name="filter"
+                                type="text" placeholder="john"
+                                onChange={handleChange} />
+                        </FormGroup>
+                        <Table responsive striped hover>
+                            <thead>
+                                <tr>
+                                    <th>Surname</th>
+                                    <th>Name</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users && users.map((d, i) => (
+                                    <tr key={i}>
+                                        <th>{d.surname}</th>
+                                        <th>{d.name}</th>
+                                        <th><Button color="success" onClick={async()=>await addMember(d.username,d.id)}>Add</Button></th>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={()=> toggleMembersModal(false)}>OK</Button>
+                    </ModalFooter>
+                </Modal>
+            )
+        }
+    }
+    const addMemberButton = () => {
+        if (!currentUser || currentUser.is_professor === 0)
+            return null;
+        const usersModal = () => {
+            return (
+                <Modal isOpen={isMembersModalOpen} toggle={_ => toggleMembersModal(false)}>
+                    <ModalHeader>Add member</ModalHeader>
+                    <ModalBody>
+                        <FormGroup>
+                            <Label for="filter">Filter</Label>
+                            <Input id="filter" name="filter"
+                                type="text" placeholder="john"
+                                onChange={handleChange} />
+                        </FormGroup>
+                        <Table responsive striped hover>
+                            <thead>
+                                <tr>
+                                    <th>Surname</th>
+                                    <th>Name</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users && users.map((d, i) => (
+                                    <tr key={i}>
+                                        <th>{d.surname}</th>
+                                        <th>{d.name}</th>
+                                        <th><Button color="success" onClick={async()=>await addMember(d.username,d.id)}>Add</Button></th>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={()=> toggleMembersModal(false)}>OK</Button>
+                    </ModalFooter>
+                </Modal>
+            )
+        }
         return (
-            <Dropdown isOpen={dropdownOpen} toggle={toggle}>
-                <DropdownToggle caret>
-                    Add member to team
-                    </DropdownToggle>
-                <DropdownMenu>
-                    {users && users.map((j, i) => {
-                        <DropdownItem >
-                            {j.username}
-                        </DropdownItem>
-                    })}
-                </DropdownMenu>
-            </Dropdown>
+            <div className="py-3">
+                {usersModal()}
+                <Button color="primary" onClick={() => toggleMembersModal(true)}>
+                    Add members
+                </Button>
+            </div>
         )
     }
     useEffect(() => {
         const requestHandler = new ApiRequestHandler();
+
         (async () => {
             await requestHandler.get('/users', {
                 query: `?username=${authHandler.getUsername()}`,
-                headers: authHandler.getAthorizationHeader()
-            }, resp => resp.status === 200 && setCurrentUser(resp[0]));
+                headers: authHandler.getAuthorizationHeader()
+            }, resp => resp.message ? setError(resp.message) : setCurrentUser(resp[0]));
 
             await requestHandler.get(`/teams/${teamId}`, {
-                headers: authHandler.getAthorizationHeader()
+                headers: authHandler.getAuthorizationHeader()
             }, async resp => {
                 setDeliverables(resp.Deliverables);
                 setMembers(resp.Users);
             });
-            await requestHandler.get('/users', {
-                query: `?is_professor=${onlyStudents ? 0 : (onlyProfessors ? 1 : 0)}`,
-                headers: authHandler.getAthorizationHeader()
-            }, async resp => {
-                let stdnts = [];
-                for (let i = 0; i < Object.keys(resp).length - 1; i++) {
-                    stdnts.push(resp[i])
-                }
-                setUsers(stdnts)
-            });
-
         })();
-    }, [authHandler, onlyStudents, onlyProfessors]);
+    }, [authHandler]);
 
     return (
-        <Col>
+        <Container className="py-2" fluid>
+            {createModal('success', success, _ => setSuccess(''))}
+            {createModal('danger', error, _ => setError(''))}
             <Row xs="2">
                 <Col>{renderMembers()}</Col>
                 <Col>{renderDeliverables()}</Col>
             </Row>
-            {addMemberDropdown()}
-        </Col>
+            <Row xs="2">
+                <Col>{addMemberButton()}</Col>
+                <Col>{addDeliverableButton()}</Col>
+            </Row>
+        </Container>
     );
 }
