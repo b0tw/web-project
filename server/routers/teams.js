@@ -51,7 +51,7 @@ router.get('/:id', async (req, res, next) => {
   try
   {
     let team = await context.Team.findOne({ where: { id: id }, include: [
-      { model: context.User, attributes: ['id', 'surname', 'name'] },
+      { model: context.User, attributes: ['id', 'username','surname', 'name'] },
       { model: context.Deliverable },
       { 
         model: context.Jury, include: [
