@@ -25,6 +25,10 @@ router.get('/', async (req, res, next) => {
     if(req.query.sort && req.query.sort === 'true')
     {
       result = result.sort((a, b) => a.grade < b.grade ? 1 : ( a.grade > b.grade ? -1 : 0 ));
+      if(result.length > 5)
+      {
+        result = result.splice(0, 5);
+      }
     }
 
     return res.status(200).send(result);
