@@ -103,7 +103,7 @@ export default function SignUp({ useAuthHandler })
                       <Input id="username" name="username" type="text" placeholder="jdoe23" value={userData.username} onChange={handleChange} />
                     </FormGroup>
                     <FormGroup>
-                      <Label for="surname">Surame</Label>
+                      <Label for="surname">Surname</Label>
                       <Input id="surname" name="surname" type="text" placeholder="Doe" value={userData.surname} onChange={handleChange} />
                     </FormGroup>
                     <FormGroup>
