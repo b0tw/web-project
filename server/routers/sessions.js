@@ -69,7 +69,7 @@ router.get('/logout', async (req, res, next) =>
 
   try
   {
-    let user = await context.User.findOne({ username: username, include: context.Session });
+    let user = await context.User.findOne({ where: { username: username }, include: context.Session });
     if(user == null)
     {
       return res.status(401).json(apiError.Unauthorized);
