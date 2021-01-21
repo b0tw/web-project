@@ -25,7 +25,7 @@ const renderTeams = teams => {
       <th scope="row">{i + 1}</th>
       <th>{t.name}</th>
       <th>{t.project_name}</th>
-      <th>{t.grade}</th>
+      <th>{t.grade || 'None'}</th>
     </tr>);
   };
 

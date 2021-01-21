@@ -80,7 +80,6 @@ router.get('/', async (req, res, next) => {
 
   try {
     let users = await context.User.findAll(options);
-    console.log(options);
     return res.status(200).json(users);
   }
   catch (err) {

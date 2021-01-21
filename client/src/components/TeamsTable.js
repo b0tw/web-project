@@ -7,6 +7,9 @@ import {
     CardHeader,
     CardTitle,
     Container,
+    FormGroup,
+    Input,
+    Label,
     Modal,
     ModalBody,
     ModalFooter,
@@ -43,9 +46,10 @@ export default function TeamsTable({ useAuthHandler, onlyStudents, onlyProfessor
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [currentUser, setCurrentUser] = useState(null);
+    const [isAddTeamModalOpen, toggleAddTeamModal] = useState(false);
+    const requestHandler = new ApiRequestHandler();
 
     const deleteTeam = async id => {
-        const requestHandler = new ApiRequestHandler();
         await requestHandler.delete(`/teams/${id}`, {
             headers: authHandler.getAuthorizationHeader()
         }, resp => resp.status === 200 ? setSuccess(`Successfully removed team.`) : setError('Could not remove team. Please try again later.'));
@@ -65,15 +69,55 @@ export default function TeamsTable({ useAuthHandler, onlyStudents, onlyProfessor
 
         return null;
     }
-    const renderTeams = () => {
+    const renderAddTeamButton = _ => {
+      if(!currentUser || currentUser.is_professor !== 1)
+      {
+        return null;
+      }
+      const handleSave = async _ =>
+      {
+        await requestHandler.post('/teams', {
+          body: { name: document.getElementById('name').value, project_name: document.getElementById('project-name').value },
+          headers: authHandler.getAuthorizationHeader()
+        }, resp => resp.status !== 200 ? setError(resp.message) : setSuccess(resp.message));
+      };
+
+      const addTeamModal = _ => (
+        <Modal isOpen={isAddTeamModalOpen} toggle={_ => toggleAddTeamModal(false)}>
+          <ModalHeader>Add team</ModalHeader>
+          <ModalBody>
+            <FormGroup>
+              <Label for="name">Name</Label>
+              <Input id="name" name="name" type="text" placeholder="Team 1" />
+            </FormGroup>
+
+            <FormGroup>
+              <Label for="project-name">Project name</Label>
+              <Input id="project-name" name="project-name" type="text" placeholder="Project 1" />
+            </FormGroup>
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={_ => toggleAddTeamModal(false)}>Cancel</Button>
+            <Button color="primary" onClick={handleSave}>Save</Button>
+          </ModalFooter>
+        </Modal>
+      );
+
+      return (
+        <div className="py-2 pb-3">
+          {addTeamModal()}
+          <Button color="success" onClick={_ => toggleAddTeamModal(true)}>Add team</Button>
+        </div>
+      )
+    };
+    const renderTeams = (renderAddTeamButton) => {
         return (
             <Card>
-                {createModal('success', success, _ => setSuccess(''))}
-                {createModal('danger', error, _ => setError(''))}
                 <CardHeader>
                     <CardTitle tag="h3"> Teams</CardTitle>
                 </CardHeader>
                 <CardBody>
+                    {renderAddTeamButton && renderAddTeamButton()}
                     <Table responsive striped hover>
                         <thead>
                             <tr>
@@ -119,6 +163,10 @@ export default function TeamsTable({ useAuthHandler, onlyStudents, onlyProfessor
     }, [authHandler, onlyStudents, onlyProfessors]);
 
     return (
-        renderTeams()
+      <Container className="py-2">
+        {createModal('success', success, _ => setSuccess(''))}
+        {createModal('danger', error, _ => setError(''))}
+        {renderTeams(renderAddTeamButton)}
+      </Container>
     )
 }

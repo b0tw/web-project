@@ -5,14 +5,9 @@ import {
     Card,
     CardBody,
     CardHeader,
-    CardSubtitle,
     CardTitle,
     Col,
     Container,
-    Dropdown,
-    DropdownToggle,
-    DropdownMenu,
-    DropdownItem,
     Form,
     FormGroup,
     Input,
@@ -84,7 +79,7 @@ export default function Team({ useAuthHandler }) {
                         {members && members.map((j, i) =>
                             <tr key={j.id}>
                                 <th scope="row">{i + 1}</th>
-                                <th><Link to={`/users/${j.username}`}>{j.username}</Link></th>
+                                <th><Link to={`/user/${j.username}`}>{j.username}</Link></th>
                                 <th>{j.surname}</th>
                                 <th>{j.name}</th>
                             </tr>)
@@ -289,7 +284,7 @@ export default function Team({ useAuthHandler }) {
                 setMembers(resp.Users);
             });
         })();
-    }, [authHandler]);
+    }, [authHandler, teamId]);
 
     return (
         <Container className="py-2" fluid>
