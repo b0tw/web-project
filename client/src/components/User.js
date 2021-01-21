@@ -286,7 +286,16 @@ export default function User({ useAuthHandler })
         </ModalBody>
 
         <ModalFooter>
-          <Button color="primary" onClick={() => { window.location.reload(); setSuccess(''); }}>Ok</Button>
+          <Button color="primary" onClick={() => {
+            if(userData.username !== username)
+            {
+              localStorage.removeItem('user-state');
+            }
+            window.location.reload();
+            setSuccess('');
+            }}>
+            Ok
+          </Button>
         </ModalFooter>
       </Modal>
       <Modal isOpen={isEdittingUserData} toggle={() => editUserData(false)}>
