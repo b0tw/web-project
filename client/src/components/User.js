@@ -251,7 +251,7 @@ export default function User({ useAuthHandler })
     }, resp => {
       if(resp.status !== 200)
       {
-        editUserData(false);
+        //editUserData(false);
         setError(resp.message);
       }
       else
@@ -311,7 +311,7 @@ export default function User({ useAuthHandler })
             </FormGroup>
             <FormGroup check>
               <Label check>
-                <Input id="is_professor" type="checkbox" name="is_professor" checked={userData.is_professor} onChange={handleChange} />{' '}
+                <Input id="is_professor" type="checkbox" name="is_professor" checked={userData.is_professor === 1} onChange={handleChange} />{' '}
                 Professor account.
               </Label>
             </FormGroup>
