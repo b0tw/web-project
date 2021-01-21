@@ -17,9 +17,12 @@ router.get('/', async (req, res, next) => {
 
     let result = allTeams.map(t => t.get({ plain: true }));
     result.forEach(t => {
-      const grades = t.Jury.Users.map(u => u.UserJury.grade);
-      t.grade = (grades.reduce((sum, g) => sum + g, 0) / grades.length).toFixed(2);
-      t.Jury = null;
+      if(t.Jury && t.Jury.Users)
+      {
+        const grades = t.Jury.Users.map(u => u.UserJury.grade);
+        t.grade = (grades.reduce((sum, g) => sum + g, 0) / grades.length).toFixed(2);
+        t.Jury = null;
+      }
     });
 
     if(req.query.sort && req.query.sort === 'true')
@@ -64,8 +67,11 @@ router.get('/:id', async (req, res, next) => {
     }
 
     let result = team.get({ plain: true });
-    result.Jury.grades = result.Jury.Users.map(u => ({ value: u.UserJury.grade, deadline: u.UserJury.deadline, userId: u.id }));
-    result.Jury.Users = null;
+    if(result.Jury && result.Jury.Users)
+    {
+      result.Jury.grades = result.Jury.Users.map(u => ({ value: u.UserJury.grade, deadline: u.UserJury.deadline, userId: u.id }));
+      result.Jury.Users = null;
+    }
 
     return res.status(200).json(result);
   }
@@ -84,20 +90,22 @@ router.post('/', async (req, res, next) => {
     //get the username from the session
     const username = req.username
     //search in the db the user
-    const user = await User.findOne({ where: username })
+    const user = await User.findOne({ where: { username: username } });
     //if the user is a professor, the addition can happen
     if (user && user.is_professor == 1) {
       const existantTeam = await Team.findOne({
         where: {
-          [Op.or]: [name, project_name]
+          [Op.or]: [{ name: name }, { project_name: project_name} ]
         }
       })
       if (existantTeam !== null) {
         return res.status(400).send({ "message": "The team name or the project is already taken" })
       }
       else {
-        const team = await Team.create({ name, project_name })
-        await context.Jury.create({ team_id: team.id });
+        const team = await Team.create({ name: name, project_name: project_name })
+        let jury = await context.Jury.create({});
+        team.setJury(jury);
+        await team.save();
         return res.status(200).send({ "message": "Team " + team.name + " was created." })
       }
     }

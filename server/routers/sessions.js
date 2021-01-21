@@ -20,7 +20,7 @@ router.post('/login', async (req, res, next) =>
     }
 
     let hash = await bcrypt.compare(password, user.password);
-    if(hash == null)
+    if(hash == null || !hash)
     {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
@@ -47,7 +47,7 @@ router.head('/check-session', async (req, res, next) =>
 
   try
   {
-    let user = await context.User.findOne({ username: username, include: context.Session });
+    let user = await context.User.findOne({ where: { username: username }, include: context.Session });
     if(user == null)
     {
       return res.status(401).json(apiError.Unauthorized);
@@ -69,7 +69,7 @@ router.get('/logout', async (req, res, next) =>
 
   try
   {
-    let user = await context.User.findOne({ username: username, include: context.Session });
+    let user = await context.User.findOne({ where: { username: username }, include: context.Session });
     if(user == null)
     {
       return res.status(401).json(apiError.Unauthorized);

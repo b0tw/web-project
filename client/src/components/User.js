@@ -47,11 +47,19 @@ const renderTeams = (authHandler, user, setError, setSuccess, setConfirmation) =
   };
   const renderTeamRow = (t, i) =>
   {
+    const computeGrade = t => {
+      const grade = (t.Jury.grades.reduce((sum, g) => sum + g.value, 0) / t.Jury.grades.length).toFixed(2);
+
+      if(isNaN(grade))
+        return 'None';
+      return grade;
+    }
+
     return (<tr key={t.id}>
       <th scope="row">{i + 1}</th>
       <th>{t.name}</th>
       <th>{t.project_name}</th>
-      <th>{(t.Jury.grades.reduce((sum, g) => sum + g.value, 0) / t.Jury.grades.length).toFixed(2)}</th>
+      <th>{computeGrade(t)}</th>
       { user.currentUser && user.currentUser.is_professor === 1 &&
       <th><Button size="xs" color="danger" onClick={() => setConfirmation({ require: true, message: `Are you sure you want to remove ${user.name} ${user.surname} from being a member of team '${t.name}'?`, callback: async () => await deleteFromTeam(t.id, user) })}>Remove</Button></th>
       }
@@ -243,7 +251,7 @@ export default function User({ useAuthHandler })
     }, resp => {
       if(resp.status !== 200)
       {
-        editUserData(false);
+        //editUserData(false);
         setError(resp.message);
       }
       else
@@ -278,7 +286,16 @@ export default function User({ useAuthHandler })
         </ModalBody>
 
         <ModalFooter>
-          <Button color="primary" onClick={() => { window.location.reload(); setSuccess(''); }}>Ok</Button>
+          <Button color="primary" onClick={() => {
+            if(userData.username !== username)
+            {
+              localStorage.removeItem('user-state');
+            }
+            window.location.reload();
+            setSuccess('');
+            }}>
+            Ok
+          </Button>
         </ModalFooter>
       </Modal>
       <Modal isOpen={isEdittingUserData} toggle={() => editUserData(false)}>
@@ -303,7 +320,7 @@ export default function User({ useAuthHandler })
             </FormGroup>
             <FormGroup check>
               <Label check>
-                <Input id="is_professor" type="checkbox" name="is_professor" checked={userData.is_professor} onChange={handleChange} />{' '}
+                <Input id="is_professor" type="checkbox" name="is_professor" checked={userData.is_professor === 1} onChange={handleChange} />{' '}
                 Professor account.
               </Label>
             </FormGroup>

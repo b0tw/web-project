@@ -80,7 +80,6 @@ router.get('/', async (req, res, next) => {
 
   try {
     let users = await context.User.findAll(options);
-    console.log(options);
     return res.status(200).json(users);
   }
   catch (err) {
@@ -130,7 +129,7 @@ router.put('/:id', async (req, res, next) => {
     }
 
     let currentUser = await context.User.findOne({ where: { username: req.username } });
-    let user = await context.User.findOne({ id: id });
+    let user = await context.User.findOne({ where: { id: id } });
     if (currentUser == null || user == null) {
       return res.status(400).json(apiError.InvalidRequest);
     }
